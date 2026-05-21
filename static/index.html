@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="股票雷達">
+  <meta name="theme-color" content="#0d1117">
+  <link rel="apple-touch-icon" href="/static/icon-192.png">
+  <link rel="manifest" href="/static/manifest.json">
+  <title>股票分析雷達</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card: #161b22;
+      --card2: #1c2128;
+      --border: #30363d;
+      --blue: #58a6ff;
+      --green: #3fb950;
+      --red: #f85149;
+      --yellow: #e3b341;
+      --purple: #d2a8ff;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --safe-top: env(safe-area-inset-top);
+      --safe-bottom: env(safe-area-inset-bottom);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      min-height: 100dvh;
+      overscroll-behavior: none;
+    }
+
+    /* ── Top Bar ── */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,17,23,0.92);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      padding: calc(var(--safe-top) + 10px) 16px 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .topbar h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+    .live-badge {
+      background: var(--green); color: #000;
+      font-size: 10px; font-weight: 700;
+      padding: 2px 7px; border-radius: 99px;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+    .time-badge {
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--muted); font-size: 11px;
+      padding: 3px 9px; border-radius: 99px;
+    }
+
+    /* ── Search ── */
+    .search-wrap { padding: 12px 16px 8px; }
+    .search-row { display: flex; gap: 8px; }
+    .search-row input {
+      flex: 1;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 16px;
+      outline: none;
+    }
+    .search-row input:focus { border-color: var(--blue); }
+    .search-row button {
+      background: var(--blue); color: #000;
+      border: none; border-radius: 10px;
+      padding: 10px 18px;
+      font-weight: 700; font-size: 15px;
+      cursor: pointer;
+    }
+    .search-row button:active { opacity: 0.7; }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex; gap: 6px;
+      padding: 4px 16px 10px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; white-space: nowrap;
+      transition: all .15s;
+    }
+    .tab.active {
+      background: var(--blue); color: #000;
+      border-color: var(--blue); font-weight: 700;
+    }
+
+    /* ── Card List ── */
+    .section { padding: 0 16px; }
+    .card-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: background .15s;
+      -webkit-user-select: none;
+    }
+    .card:active { background: var(--card2); }
+    .card.buy-signal  { border-left: 3px solid var(--green); }
+    .card.sell-signal { border-left: 3px solid var(--red); }
+
+    .card-sym { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+    .card-meta { font-size: 12px; color: var(--muted); }
+    .card-price { font-size: 20px; font-weight: 700; text-align: right; }
+    .card-price.up   { color: var(--green); }
+    .card-price.down { color: var(--red); }
+
+    .badge {
+      display: inline-block;
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 11px; font-weight: 700;
+      margin-top: 4px;
+    }
+    .badge.green { background: rgba(63,185,80,.18); color: var(--green); }
+    .badge.red   { background: rgba(248,81,73,.18);  color: var(--red); }
+    .badge.blue  { background: rgba(88,166,255,.18); color: var(--blue); }
+    .badge.yellow{ background: rgba(227,179,65,.18); color: var(--yellow); }
+
+    /* ── Metric Grid ── */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .metric {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 13px;
+    }
+    .metric .mlabel { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+    .metric .mvalue { font-size: 18px; font-weight: 700; }
+    .metric .mvalue.green { color: var(--green); }
+    .metric .mvalue.red   { color: var(--red); }
+    .metric .mvalue.blue  { color: var(--blue); }
+
+    /* ── Detail Panel ── */
+    .detail-panel {
+      display: none;
+      padding: 4px 16px calc(var(--safe-bottom) + 32px);
+    }
+    .detail-panel.visible { display: block; }
+    .detail-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 4px;
+    }
+    .detail-title { font-size: 18px; font-weight: 700; }
+    .close-btn {
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--muted); border-radius: 8px;
+      padding: 5px 12px; font-size: 13px; cursor: pointer;
+    }
+    .close-btn:active { opacity: 0.7; }
+    .chart-img {
+      width: 100%; border-radius: 12px;
+      margin-top: 10px;
+      background: var(--card);
+      min-height: 160px;
+    }
+
+    /* ── Loading ── */
+    .loading {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .spinner {
+      width: 28px; height: 28px;
+      border: 2px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Empty ── */
+    .empty {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* ── Bottom padding for iPhone home indicator ── */
+    .bottom-pad { height: calc(var(--safe-bottom) + 16px); }
+  </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="topbar">
+  <div class="topbar-left">
+    <h1>股票雷達</h1>
+    <span class="live-badge">LIVE</span>
+  </div>
+  <span class="time-badge" id="last-update">--:--</span>
+</div>
+
+<!-- Search -->
+<div class="search-wrap">
+  <div class="search-row">
+    <input id="sym-input" type="text"
+           placeholder="AAPL / 0700.HK / sh600519"
+           autocapitalize="characters"
+           autocomplete="off"
+           autocorrect="off"
+           spellcheck="false"
+           inputmode="text"
+           onkeydown="if(event.key==='Enter')analyzeSymbol()">
+    <button onclick="analyzeSymbol()">分析</button>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" id="tab-scan-btn"    onclick="switchTab('scan',    this)">掃描</div>
+  <div class="tab"        id="tab-ml-btn"      onclick="switchTab('ml',      this)">AI評分</div>
+  <div class="tab"        id="tab-history-btn" onclick="switchTab('history', this)">歷史</div>
+</div>
+
+<!-- Tab: Scan -->
+<div id="tab-scan" class="section">
+  <div class="card-list" id="scan-list">
+    <div class="loading"><div class="spinner"></div>掃描市場中...</div>
+  </div>
+</div>
+
+<!-- Tab: ML Score -->
+<div id="tab-ml" class="section" style="display:none">
+  <div class="card-list" id="ml-list">
+    <div class="loading"><div class="spinner"></div>載入 AI 評分...</div>
+  </div>
+</div>
+
+<!-- Tab: History -->
+<div id="tab-history" class="section" style="display:none">
+  <div class="card-list" id="history-list">
+    <div class="loading"><div class="spinner"></div>載入歷史記錄...</div>
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div class="detail-panel" id="detail-panel">
+  <div class="detail-header">
+    <div class="detail-title" id="detail-title">--</div>
+    <button class="close-btn" onclick="closeDetail()">✕ 關閉</button>
+  </div>
+  <div class="metric-grid" id="metric-grid">
+    <div class="loading"><div class="spinner"></div></div>
+  </div>
+  <img class="chart-img" id="chart-img" src="" alt="圖表載入中..."
+       style="display:none" onerror="this.style.display='none'">
+</div>
+
+<div class="bottom-pad"></div>
+
+<script>
+const API = "";   // same origin — empty string is correct
+const DEFAULT_SYMBOLS = "AAPL,MSFT,NVDA,TSLA,META,0700.HK,9988.HK,sh600519,sh601318";
+
+// ── Utils ─────────────────────────────────
+async function fetchJSON(url, opts = {}) {
+  const res = await fetch(API + url, opts);
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`HTTP ${res.status}: ${text.slice(0, 120)}`);
+  }
+  return res.json();
+}
+
+function setLoading(id, msg = "載入中...") {
+  document.getElementById(id).innerHTML =
+    `<div class="loading"><div class="spinner"></div>${msg}</div>`;
+}
+
+function setError(id, msg) {
+  document.getElementById(id).innerHTML =
+    `<div class="empty">⚠️ ${msg}</div>`;
+}
+
+function updateTime() {
+  document.getElementById("last-update").textContent =
+    new Date().toLocaleTimeString("zh-Hant", { hour: "2-digit", minute: "2-digit" });
+}
+
+// ── Scan ──────────────────────────────────
+async function loadScan() {
+  setLoading("scan-list", "掃描市場中...");
+  try {
+    const data = await fetchJSON("/api/scan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ symbols: DEFAULT_SYMBOLS.split(","), min_buy_score: 2 }),
+    });
+    renderScanCards("scan-list", data.results || []);
+    updateTime();
+  } catch (e) {
+    setError("scan-list", e.message);
+  }
+}
+
+// ── ML Score ──────────────────────────────
+async function loadML() {
+  setLoading("ml-list", "AI 評分計算中...");
+  try {
+    const data = await fetchJSON(`/api/ml/score?symbols=${DEFAULT_SYMBOLS}&top_n=10`);
+    renderMLCards("ml-list", data.results || []);
+  } catch (e) {
+    setError("ml-list", "AI 模型尚未訓練或載入失敗，請先執行訓練。");
+  }
+}
+
+// ── History ───────────────────────────────
+async function loadHistory() {
+  setLoading("history-list", "載入歷史記錄...");
+  try {
+    const data = await fetchJSON("/api/history/scans?limit=40");
+    if (!data.length) { setError("history-list", "暫無掃描記錄"); return; }
+    document.getElementById("history-list").innerHTML = data.map(r => `
+      <div class="card" onclick="showDetail('${r.symbol}')">
+        <div>
+          <div class="card-sym">${r.symbol}</div>
+          <div class="card-meta">${(r.time || "").slice(0, 16)}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="card-price">${r.Close ?? "--"}</div>
+          <span class="badge green">Buy ${r.BUY_SCORE ?? 0}/3</span>
+        </div>
+      </div>`).join("");
+  } catch (e) {
+    setError("history-list", e.message);
+  }
+}
+
+// ── Render scan cards ─────────────────────
+function renderScanCards(id, items) {
+  const el = document.getElementById(id);
+  if (!items.length) { el.innerHTML = '<div class="empty">📭 今日無強訊號標的</div>'; return; }
+  el.innerHTML = items.map(item => {
+    const sym    = item.Symbol || item.symbol || "?";
+    const isBuy  = (item.BUY_SCORE >= 2);
+    const isSell = (item.SELL_SCORE >= 2);
+    const cls    = isBuy ? "buy-signal" : isSell ? "sell-signal" : "";
+    const b      = isBuy
+      ? `<span class="badge green">買入 ${item.BUY_SCORE}/3</span>`
+      : `<span class="badge red">賣出 ${item.SELL_SCORE}/3</span>`;
+    return `
+      <div class="card ${cls}" onclick="showDetail('${sym}')">
+        <div>
+          <div class="card-sym">${sym}</div>
+          <div class="card-meta">RSI ${item.RSI14 ?? "--"} &nbsp;|&nbsp; ATR ${item.ATR14 ?? "--"}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="card-price ${isBuy?'up':isSell?'down':''}">${item.Close ?? "--"}</div>
+          ${b}
+        </div>
+      </div>`;
+  }).join("");
+}
+
+// ── Render ML cards ───────────────────────
+function renderMLCards(id, items) {
+  const el = document.getElementById(id);
+  if (!items.length) { el.innerHTML = '<div class="empty">📭 暫無評分結果</div>'; return; }
+  el.innerHTML = items.map(item => {
+    const sym  = item.Symbol || item.symbol || "?";
+    const prob = parseFloat(item["BUY_PROB%"] || 0);
+    const cls  = prob >= 65 ? "buy-signal" : prob <= 35 ? "sell-signal" : "";
+    const bCls = prob >= 65 ? "green" : prob <= 35 ? "red" : "yellow";
+    return `
+      <div class="card ${cls}" onclick="showDetail('${sym}')">
+        <div>
+          <div class="card-sym">${sym}</div>
+          <div class="card-meta">MA Score: ${item.MA_SCORE ?? "--"} &nbsp;|&nbsp; MOM20: ${item.MOM_20 ?? "--"}%</div>
+        </div>
+        <div style="text-align:right">
+          <div class="card-price">${item.Close ?? "--"}</div>
+          <span class="badge ${bCls}">AI ${prob}%</span>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+// ── Detail ────────────────────────────────
+async function showDetail(symbol) {
+  document.getElementById("detail-title").textContent = symbol;
+  document.getElementById("metric-grid").innerHTML =
+    `<div class="loading"><div class="spinner"></div>分析中...</div>`;
+  document.getElementById("chart-img").style.display = "none";
+
+  const panel = document.getElementById("detail-panel");
+  panel.classList.add("visible");
+  panel.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  try {
+    const data = await fetchJSON(`/api/analyze/${encodeURIComponent(symbol)}`);
+    const l = data.latest || {};
+    const f = data.fundamentals || {};
+
+    const metrics = [
+      ["收盤價", l.close,     l.close >= l.ma20 ? "green" : "red"],
+      ["RSI(14)", l.rsi14,   l.rsi14 < 30 ? "green" : l.rsi14 > 70 ? "red" : "blue"],
+      ["買入評分", `${l.buy_score}/3`,  l.buy_score >= 2 ? "green" : "muted"],
+      ["賣出評分", `${l.sell_score}/3`, l.sell_score >= 2 ? "red" : "muted"],
+      ["MA20",    l.ma20,    "blue"],
+      ["MA60",    l.ma60,    "blue"],
+      ["ATR(14)", l.atr14,   "yellow"],
+      ["PE(TTM)", f.PE_TTM ?? "N/A", ""],
+      ["PB",      f.PB ?? "N/A",     ""],
+      ["ROE",     f.ROE_Latest != null ? (f.ROE_Latest * 100).toFixed(1) + "%" : "N/A", ""],
+    ];
+
+    document.getElementById("metric-grid").innerHTML = metrics.map(([k, v, c]) => `
+      <div class="metric">
+        <div class="mlabel">${k}</div>
+        <div class="mvalue ${c || ''}">${v ?? "N/A"}</div>
+      </div>`).join("");
+
+    // Load chart async
+    const img = document.getElementById("chart-img");
+    img.style.display = "block";
+    img.src = `${API}/api/chart/${encodeURIComponent(symbol)}?period=1y&t=${Date.now()}`;
+    img.onload  = () => { img.style.display = "block"; };
+    img.onerror = () => { img.style.display = "none"; };
+
+  } catch (e) {
+    document.getElementById("metric-grid").innerHTML =
+      `<div class="empty">⚠️ ${e.message}</div>`;
+  }
+}
+
+function analyzeSymbol() {
+  const sym = document.getElementById("sym-input").value.trim();
+  if (sym) {
+    showDetail(sym);
+    document.getElementById("sym-input").blur();
+  }
+}
+
+function closeDetail() {
+  document.getElementById("detail-panel").classList.remove("visible");
+}
+
+// ── Tab Switch ────────────────────────────
+let loadedTabs = new Set();
+
+function switchTab(tab, el) {
+  ["scan", "ml", "history"].forEach(t => {
+    document.getElementById(`tab-${t}`).style.display = t === tab ? "" : "none";
+  });
+  document.querySelectorAll(".tab").forEach(e => e.classList.remove("active"));
+  el.classList.add("active");
+  closeDetail();
+
+  if (!loadedTabs.has(tab)) {
+    loadedTabs.add(tab);
+    if (tab === "ml")      loadML();
+    if (tab === "history") loadHistory();
+  }
+}
+
+// ── Init ──────────────────────────────────
+loadedTabs.add("scan");
+loadScan();
+</script>
+</body>
+</html>

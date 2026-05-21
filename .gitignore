@@ -1,0 +1,14 @@
+.env
+output/
+__pycache__/
+*.pyc
+*.pyo
+*.pkl
+*.png
+*.xlsx
+.DS_Store
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
