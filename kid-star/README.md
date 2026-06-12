@@ -22,7 +22,22 @@ npm run dev
 
 > PWA 離線功能只會喺 `npm run build` 之後嘅正式版生效(`npm run preview` 可本地測試)。
 
-## 部署到 Vercel
+## 部署到 GitHub Pages(免費,唔使開新帳號)
+
+Repo 入面已經有自動部署 workflow(`.github/workflows/deploy-kid-star.yml`):
+
+1. 去 GitHub repo → **Settings → Pages**,**Source** 揀 **GitHub Actions**
+2. push 任何 `kid-star/` 嘅改動上 `main`(或者去 **Actions** tab 手動撳
+   **Deploy 星星學園 to GitHub Pages → Run workflow**)
+3. 等一兩分鐘,網址就係:
+   **https://jasonyclok-cpu.github.io/stock-radar/**
+
+之後每次 push 上 `main` 會自動重新部署。
+
+> 技術細節:GitHub Pages 部署喺子路徑 `/stock-radar/`,workflow 會用
+> 環境變數 `BASE_PATH=/stock-radar/` build;本地開發同 Vercel 唔受影響。
+
+## 部署到 Vercel(另一選擇)
 
 1. 將呢個 repo push 上 GitHub
 2. 去 [vercel.com](https://vercel.com) → **Add New Project** → 揀呢個 repo
