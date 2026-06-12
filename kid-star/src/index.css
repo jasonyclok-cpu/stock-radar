@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+body {
+  @apply bg-sky-200 font-kid text-slate-800;
+  /* iPad 加至主畫面後填滿安全區 */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+}
+
+@layer components {
+  /* 所有可按嘅嘢:最少 48x48、大圓角、按落去有回饋 */
+  .kid-btn {
+    @apply min-h-[48px] min-w-[48px] rounded-2xl font-bold shadow-md transition
+      active:scale-95 active:shadow-sm disabled:opacity-40 disabled:active:scale-100;
+  }
+  .kid-card {
+    @apply rounded-3xl bg-white shadow-lg;
+  }
+}

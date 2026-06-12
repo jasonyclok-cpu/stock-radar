@@ -1,0 +1,364 @@
+[
+  {
+    "id": "chi-mw-001",
+    "subject": "chinese",
+    "topic": "量詞",
+    "difficulty": 1,
+    "type": "fill_blank",
+    "inputMode": "choices",
+    "choices": ["隻", "本", "張", "朵"],
+    "question": "一__小狗",
+    "answer": "隻",
+    "explanation": "動物多數用「隻」,例如一隻狗、一隻貓、一隻鳥。"
+  },
+  {
+    "id": "chi-mw-002",
+    "subject": "chinese",
+    "topic": "量詞",
+    "difficulty": 1,
+    "type": "fill_blank",
+    "inputMode": "choices",
+    "choices": ["本", "條", "隻", "座"],
+    "question": "一__圖書",
+    "answer": "本",
+    "explanation": "書本用「本」,例如一本書、一本故事書。"
+  },
+  {
+    "id": "chi-mw-003",
+    "subject": "chinese",
+    "topic": "量詞",
+    "difficulty": 1,
+    "type": "fill_blank",
+    "inputMode": "choices",
+    "choices": ["朵", "枝", "本", "間"],
+    "question": "一__花",
+    "answer": "朵",
+    "explanation": "花用「朵」,例如一朵花、一朵白雲。"
+  },
+  {
+    "id": "chi-mw-004",
+    "subject": "chinese",
+    "topic": "量詞",
+    "difficulty": 2,
+    "type": "fill_blank",
+    "inputMode": "choices",
+    "choices": ["條", "隻", "枝", "間"],
+    "question": "一__魚",
+    "answer": "條",
+    "explanation": "長長嘅嘢多數用「條」,例如一條魚、一條褲、一條路。"
+  },
+  {
+    "id": "chi-mw-005",
+    "subject": "chinese",
+    "topic": "量詞",
+    "difficulty": 2,
+    "type": "fill_blank",
+    "inputMode": "choices",
+    "choices": ["張", "本", "粒", "座"],
+    "question": "一__紙",
+    "answer": "張",
+    "explanation": "扁平嘅嘢用「張」,例如一張紙、一張枱、一張床。"
+  },
+  {
+    "id": "chi-mw-006",
+    "subject": "chinese",
+    "topic": "量詞",
+    "difficulty": 2,
+    "type": "fill_blank",
+    "inputMode": "choices",
+    "choices": ["枝", "張", "朵", "條"],
+    "question": "一__鉛筆",
+    "answer": "枝",
+    "explanation": "長條形、好似樹枝嘅嘢用「枝」,例如一枝筆、一枝雨傘。"
+  },
+  {
+    "id": "chi-mw-007",
+    "subject": "chinese",
+    "topic": "量詞",
+    "difficulty": 3,
+    "type": "fill_blank",
+    "inputMode": "choices",
+    "choices": ["輛", "條", "座", "隻"],
+    "question": "一__汽車",
+    "answer": "輛",
+    "explanation": "車用「輛」,例如一輛汽車、一輛巴士。"
+  },
+  {
+    "id": "chi-mw-008",
+    "subject": "chinese",
+    "topic": "量詞",
+    "difficulty": 3,
+    "type": "fill_blank",
+    "inputMode": "choices",
+    "choices": ["座", "張", "枝", "朵"],
+    "question": "一__高山",
+    "answer": "座",
+    "explanation": "又大又高、唔郁得嘅嘢用「座」,例如一座山、一座大廈。"
+  },
+  {
+    "id": "chi-match-001",
+    "subject": "chinese",
+    "topic": "詞語配對",
+    "difficulty": 1,
+    "type": "matching",
+    "question": "把意思相反的詞語配對",
+    "pairs": [
+      { "left": "大", "right": "小" },
+      { "left": "高", "right": "矮" },
+      { "left": "多", "right": "少" }
+    ],
+    "answer": "大↔小、高↔矮、多↔少",
+    "explanation": "呢啲係反義詞:大同小相反,高同矮相反,多同少相反。"
+  },
+  {
+    "id": "chi-match-002",
+    "subject": "chinese",
+    "topic": "詞語配對",
+    "difficulty": 1,
+    "type": "matching",
+    "question": "把意思相反的詞語配對",
+    "pairs": [
+      { "left": "上", "right": "下" },
+      { "left": "前", "right": "後" },
+      { "left": "左", "right": "右" }
+    ],
+    "answer": "上↔下、前↔後、左↔右",
+    "explanation": "呢啲係方向嘅反義詞:上對下,前對後,左對右。"
+  },
+  {
+    "id": "chi-match-003",
+    "subject": "chinese",
+    "topic": "詞語配對",
+    "difficulty": 2,
+    "type": "matching",
+    "question": "把意思相近的詞語配對",
+    "pairs": [
+      { "left": "開心", "right": "快樂" },
+      { "left": "美麗", "right": "漂亮" },
+      { "left": "聰明", "right": "伶俐" }
+    ],
+    "answer": "開心↔快樂、美麗↔漂亮、聰明↔伶俐",
+    "explanation": "呢啲係近義詞,意思差唔多:開心即係快樂,美麗即係漂亮,聰明即係伶俐。"
+  },
+  {
+    "id": "chi-match-004",
+    "subject": "chinese",
+    "topic": "詞語配對",
+    "difficulty": 2,
+    "type": "matching",
+    "question": "把意思相近的詞語配對",
+    "pairs": [
+      { "left": "觀看", "right": "觀賞" },
+      { "left": "說話", "right": "講話" },
+      { "left": "行走", "right": "步行" }
+    ],
+    "answer": "觀看↔觀賞、說話↔講話、行走↔步行",
+    "explanation": "呢啲係近義詞:觀看同觀賞都係「睇」,說話同講話都係「講嘢」,行走同步行都係「行路」。"
+  },
+  {
+    "id": "chi-match-005",
+    "subject": "chinese",
+    "topic": "詞語配對",
+    "difficulty": 3,
+    "type": "matching",
+    "question": "把意思相反的詞語配對",
+    "pairs": [
+      { "left": "勤力", "right": "懶惰" },
+      { "left": "安靜", "right": "嘈吵" },
+      { "left": "乾淨", "right": "骯髒" }
+    ],
+    "answer": "勤力↔懶惰、安靜↔嘈吵、乾淨↔骯髒",
+    "explanation": "呢啲係反義詞:勤力嘅相反係懶惰,安靜嘅相反係嘈吵,乾淨嘅相反係骯髒。"
+  },
+  {
+    "id": "chi-match-006",
+    "subject": "chinese",
+    "topic": "詞語配對",
+    "difficulty": 3,
+    "type": "matching",
+    "question": "把意思相近的詞語配對",
+    "pairs": [
+      { "left": "立刻", "right": "馬上" },
+      { "left": "高興", "right": "愉快" },
+      { "left": "害怕", "right": "恐懼" }
+    ],
+    "answer": "立刻↔馬上、高興↔愉快、害怕↔恐懼",
+    "explanation": "呢啲係近義詞:立刻即係馬上(即刻),高興即係愉快,害怕即係恐懼(驚)。"
+  },
+  {
+    "id": "chi-punc-001",
+    "subject": "chinese",
+    "topic": "標點符號",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "你今天吃了早餐嗎__",
+    "options": ["?", "。", "!", ","],
+    "answer": "?",
+    "explanation": "呢句係問人嘢,問句尾要用問號「?」。"
+  },
+  {
+    "id": "chi-punc-002",
+    "subject": "chinese",
+    "topic": "標點符號",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "我喜歡吃蘋果__",
+    "options": ["。", "?", "、", ","],
+    "answer": "。",
+    "explanation": "呢句講完一件事,句子完結要用句號「。」。"
+  },
+  {
+    "id": "chi-punc-003",
+    "subject": "chinese",
+    "topic": "標點符號",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "哇!這朵花真美麗__",
+    "options": ["!", "?", "。", "、"],
+    "answer": "!",
+    "explanation": "呢句表達好驚喜、好強烈嘅感覺,要用感嘆號「!」。"
+  },
+  {
+    "id": "chi-punc-004",
+    "subject": "chinese",
+    "topic": "標點符號",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "媽媽買了蘋果__香蕉和橙。",
+    "options": ["、", "。", "?", "!"],
+    "answer": "、",
+    "explanation": "一連串並排嘅嘢(蘋果、香蕉、橙)中間要用頓號「、」分開。"
+  },
+  {
+    "id": "chi-punc-005",
+    "subject": "chinese",
+    "topic": "標點符號",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "今天天氣很好__我們去公園玩。",
+    "options": [",", "。", "、", "?"],
+    "answer": ",",
+    "explanation": "句子中間停一停、唞一唞,用逗號「,」。句子仲未講完,所以唔用句號。"
+  },
+  {
+    "id": "chi-punc-006",
+    "subject": "chinese",
+    "topic": "標點符號",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "救命啊__",
+    "options": ["!", "。", "?", ","],
+    "answer": "!",
+    "explanation": "大叫「救命」係好緊張、好大聲嘅說話,要用感嘆號「!」。"
+  },
+  {
+    "id": "chi-punc-007",
+    "subject": "chinese",
+    "topic": "標點符號",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "弟弟問:「這是甚麼__」",
+    "options": ["?", "!", "。", "、"],
+    "answer": "?",
+    "explanation": "弟弟「問」嘢,問句尾要用問號「?」,而且要放喺引號入面。"
+  },
+  {
+    "id": "chi-punc-008",
+    "subject": "chinese",
+    "topic": "標點符號",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "我有一隻小貓__牠很可愛。",
+    "options": [",", "。", "、", "?"],
+    "answer": ",",
+    "explanation": "兩個短句連埋一齊講同一樣嘢,中間用逗號「,」唞一唞。"
+  },
+  {
+    "id": "chi-re-001",
+    "subject": "chinese",
+    "topic": "重組句子",
+    "difficulty": 1,
+    "type": "reorder",
+    "question": "重組句子",
+    "words": ["我", "今天", "上學", "。"],
+    "answer": "我今天上學。",
+    "explanation": "先講「我」(邊個),再講「今天」(幾時),最後講「上學」(做乜嘢)。"
+  },
+  {
+    "id": "chi-re-002",
+    "subject": "chinese",
+    "topic": "重組句子",
+    "difficulty": 1,
+    "type": "reorder",
+    "question": "重組句子",
+    "words": ["我", "喜歡", "畫畫", "。"],
+    "answer": "我喜歡畫畫。",
+    "explanation": "「我」係主角,「喜歡」係感覺,「畫畫」係喜歡嘅嘢。"
+  },
+  {
+    "id": "chi-re-003",
+    "subject": "chinese",
+    "topic": "重組句子",
+    "difficulty": 2,
+    "type": "reorder",
+    "question": "重組句子",
+    "words": ["我們", "去", "公園", "玩", "。"],
+    "answer": "我們去公園玩。",
+    "explanation": "「我們」做主角,「去公園」講去邊度,「玩」講做乜嘢。"
+  },
+  {
+    "id": "chi-re-004",
+    "subject": "chinese",
+    "topic": "重組句子",
+    "difficulty": 2,
+    "type": "reorder",
+    "question": "重組句子",
+    "words": ["我", "有", "一隻", "小狗", "。"],
+    "answer": "我有一隻小狗。",
+    "explanation": "「我有」之後,要講有乜嘢:「一隻小狗」。量詞「一隻」要放喺「小狗」前面。"
+  },
+  {
+    "id": "chi-re-005",
+    "subject": "chinese",
+    "topic": "重組句子",
+    "difficulty": 2,
+    "type": "reorder",
+    "question": "重組句子",
+    "words": ["妹妹", "喜歡", "吃", "蘋果", "。"],
+    "answer": "妹妹喜歡吃蘋果。",
+    "explanation": "「妹妹」係主角,「喜歡吃」係做嘅嘢,「蘋果」係食嘅嘢。"
+  },
+  {
+    "id": "chi-re-006",
+    "subject": "chinese",
+    "topic": "重組句子",
+    "difficulty": 3,
+    "type": "reorder",
+    "question": "重組句子",
+    "words": ["哥哥", "在", "圖書館", "看書", "。"],
+    "answer": "哥哥在圖書館看書。",
+    "explanation": "「在圖書館」講喺邊度,要放喺「看書」之前:哥哥 → 在圖書館 → 看書。"
+  },
+  {
+    "id": "chi-re-007",
+    "subject": "chinese",
+    "topic": "重組句子",
+    "difficulty": 3,
+    "type": "reorder",
+    "question": "重組句子",
+    "words": ["今天", "的", "天氣", "真好", "。"],
+    "answer": "今天的天氣真好。",
+    "explanation": "「今天的」形容「天氣」,所以「的」要放喺「今天」同「天氣」中間。"
+  },
+  {
+    "id": "chi-re-008",
+    "subject": "chinese",
+    "topic": "重組句子",
+    "difficulty": 3,
+    "type": "reorder",
+    "question": "重組句子",
+    "words": ["媽媽", "在", "廚房", "做", "晚飯", "。"],
+    "answer": "媽媽在廚房做晚飯。",
+    "explanation": "「在廚房」講喺邊度,放喺「做晚飯」之前:媽媽 → 在廚房 → 做晚飯。"
+  }
+]
