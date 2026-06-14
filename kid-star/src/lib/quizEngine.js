@@ -28,7 +28,7 @@ export function recordAdaptive(subject, correct) {
   if (correct) {
     s.correctStreak += 1
     s.wrongStreak = 0
-    if (s.correctStreak >= 3) s.bias = 1
+    if (s.correctStreak >= 2) s.bias = 1
   } else {
     s.wrongStreak += 1
     s.correctStreak = 0
@@ -49,7 +49,8 @@ export function pickQuestion(pool, usedIds, bias) {
   const target = Math.min(3, Math.max(1, 2 + bias))
   const weighted = candidates.map((q) => {
     const dist = Math.abs(q.difficulty - target)
-    return { q, w: dist === 0 ? 4 : dist === 1 ? 1.5 : 0.5 }
+    // 提高難題比例:命中目標難度權重更高,偏離就更細
+    return { q, w: dist === 0 ? 6 : dist === 1 ? 1.5 : 0.4 }
   })
   let r = Math.random() * weighted.reduce((s, x) => s + x.w, 0)
   for (const { q, w } of weighted) {
