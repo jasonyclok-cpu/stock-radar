@@ -13,6 +13,9 @@ export const LEVELS = {
     { id: 3, name: '乘法山丘', emoji: '✖️', topics: ['乘法表'] },
     { id: 4, name: '時鐘塔', emoji: '🕐', topics: ['看時鐘'] },
     { id: 5, name: '星星挑戰', emoji: '🌟', topics: ['兩位數加法', '兩位數減法', '乘法表', '看時鐘'] },
+    { id: 6, name: '乘法山谷', emoji: '✖️', topics: ['乘法表(3、4)'] },
+    { id: 7, name: '金錢小舖', emoji: '💰', topics: ['認識金錢'] },
+    { id: 8, name: '終極挑戰', emoji: '👑', topics: ['兩位數加法', '兩位數減法', '乘法表', '看時鐘', '乘法表(3、4)', '認識金錢'] },
   ],
   chinese: [
     { id: 1, name: '量詞樂園', emoji: '🐶', topics: ['量詞'] },
@@ -20,6 +23,9 @@ export const LEVELS = {
     { id: 3, name: '標點小鎮', emoji: '❓', topics: ['標點符號'] },
     { id: 4, name: '句子工場', emoji: '📝', topics: ['重組句子'] },
     { id: 5, name: '星星挑戰', emoji: '🌟', topics: ['量詞', '詞語配對', '標點符號', '重組句子'] },
+    { id: 6, name: '詞語魔法', emoji: '🪄', topics: ['詞語填充'] },
+    { id: 7, name: '部首花園', emoji: '🌳', topics: ['部首'] },
+    { id: 8, name: '終極挑戰', emoji: '👑', topics: ['量詞', '詞語配對', '標點符號', '重組句子', '詞語填充', '部首'] },
   ],
   english: [
     { id: 1, name: '拼字海灘', emoji: '🏖️', topics: ['拼寫'] },
@@ -27,5 +33,8 @@ export const LEVELS = {
     { id: 3, name: '複數農場', emoji: '🐑', topics: ['單複數'] },
     { id: 4, name: '句子城堡', emoji: '🏰', topics: ['句子填充'] },
     { id: 5, name: '星星挑戰', emoji: '🌟', topics: ['拼寫', 'a/an 用法', '單複數', '句子填充'] },
+    { id: 6, name: '時光機', emoji: '⏰', topics: ['過去式'] },
+    { id: 7, name: '位置探險', emoji: '🧭', topics: ['介詞'] },
+    { id: 8, name: '終極挑戰', emoji: '👑', topics: ['拼寫', 'a/an 用法', '單複數', '句子填充', '過去式', '介詞'] },
   ],
 }

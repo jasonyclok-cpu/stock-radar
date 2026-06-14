@@ -37,8 +37,8 @@ export default function Home({ go, toast }) {
 
   return (
     <div className="mx-auto min-h-screen max-w-5xl px-4 pb-10 pt-4">
-      {/* 頂欄 */}
-      <header className="flex items-center justify-between">
+      {/* 頂欄(直向窄螢幕會自動換行) */}
+      <header className="flex flex-wrap items-center justify-between gap-y-2">
         <div
           className="flex cursor-pointer select-none items-center gap-2"
           onPointerDown={startPress}
