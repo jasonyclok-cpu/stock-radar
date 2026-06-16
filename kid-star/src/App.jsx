@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import Home from './pages/Home'
 import Quiz from './pages/Quiz'
-import CatchStars from './pages/CatchStars'
 import MemoryMatch from './pages/MemoryMatch'
 import ParentDashboard from './pages/ParentDashboard'
 
@@ -14,10 +13,8 @@ export default function App() {
   switch (screen.name) {
     case 'quiz':
       return <Quiz key={screen.nonce} subject={screen.subject} levelId={screen.levelId} go={go} />
-    case 'catch':
-      return <CatchStars go={go} />
     case 'memory':
-      return <MemoryMatch go={go} />
+      return <MemoryMatch key={screen.nonce} go={go} />
     case 'parent':
       return <ParentDashboard go={go} />
     default:

@@ -3,15 +3,18 @@ import confetti from 'canvas-confetti'
 import { MEMORY_PAIRS } from '../data/memoryPairs'
 import { shuffle } from '../lib/quizEngine'
 import { playClick, playPop, playLevelClear } from '../lib/audio'
+import { speak } from '../lib/speech'
 
-// 記憶配對:12 張卡(6 對中英文詞語),翻兩張配對
+const PAIR_COUNT = 8 // 8 對 = 16 張卡(比之前難)
+
+// 記憶配對:16 張卡(8 對中英文詞語),翻兩張配對,翻牌會讀出該詞
 export default function MemoryMatch({ go }) {
   const cards = useMemo(() => {
-    const pairs = shuffle(MEMORY_PAIRS).slice(0, 6)
+    const pairs = shuffle(MEMORY_PAIRS).slice(0, PAIR_COUNT)
     return shuffle(
       pairs.flatMap((p, i) => [
-        { key: `zh-${i}`, pairId: i, text: p.zh, lang: 'zh' },
-        { key: `en-${i}`, pairId: i, text: p.en, lang: 'en' },
+        { key: `zh-${i}`, pairId: i, text: p.zh, lang: 'zh-HK' },
+        { key: `en-${i}`, pairId: i, text: p.en, lang: 'en-US' },
       ]),
     )
   }, [])
@@ -25,6 +28,7 @@ export default function MemoryMatch({ go }) {
   const tap = (card) => {
     if (locked || flipped.some((c) => c.key === card.key) || matched.has(card.key)) return
     playClick()
+    speak(card.text, card.lang) // 翻牌即讀出該詞,玩樂中認讀
     const next = [...flipped, card]
     setFlipped(next)
     if (next.length === 2) {
@@ -76,7 +80,7 @@ export default function MemoryMatch({ go }) {
       ) : (
         <>
           <p className="mt-2 text-center text-lg text-sky-600">將中文詞語同英文配對!</p>
-          <div className="mt-3 grid flex-1 grid-cols-3 gap-3 sm:grid-cols-4">
+          <div className="mt-3 grid flex-1 grid-cols-4 gap-2 sm:gap-3">
             {cards.map((card) => {
               const isOpen = matched.has(card.key) || flipped.some((c) => c.key === card.key)
               return (
