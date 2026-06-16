@@ -90,21 +90,11 @@ export default function Home({ go, toast }) {
       <section className="mt-8">
         <h2 className="title-pop text-3xl">🎮 小遊戲樂園</h2>
         <p className="mt-1 text-lg font-bold text-sky-700">用 {GAME_COST} 粒 ⭐ 玩一次!</p>
-        <div className="mt-3 grid gap-4 sm:grid-cols-2">
-          <GameCard
-            emoji="🧺"
-            title="接星星"
-            desc="60 秒內接住跌落嘅星星!"
-            from="from-rose-400"
-            to="to-pink-500"
-            cost={GAME_COST}
-            locked={stars < GAME_COST}
-            onClick={() => playGame('catch')}
-          />
+        <div className="mt-3">
           <GameCard
             emoji="🃏"
             title="記憶配對"
-            desc="翻卡配對中英文詞語!"
+            desc="翻卡配對中英文詞語,翻牌仲會讀出嚟!"
             from="from-violet-400"
             to="to-fuchsia-500"
             cost={GAME_COST}

@@ -60,6 +60,21 @@ export function pickQuestion(pool, usedIds, bias) {
   return weighted[weighted.length - 1].q
 }
 
+// ---- 減少重複:記住每科最近出過嘅題目 ----
+const RECENT_KEEP = 12
+
+export function getRecentlySeen(subject) {
+  return load('recentSeen', {})[subject] || []
+}
+
+export function recordSeen(subject, ids) {
+  const all = load('recentSeen', {})
+  const prev = all[subject] || []
+  // 新題排前,只保留最近 RECENT_KEEP 條
+  all[subject] = [...ids, ...prev.filter((id) => !ids.includes(id))].slice(0, RECENT_KEEP)
+  save('recentSeen', all)
+}
+
 // 答錯後搵一條「類似題」:同 topic、難度最接近;搵唔到就重出原題
 export function pickSimilar(question, pool, usedIds) {
   const candidates = pool

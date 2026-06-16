@@ -9,11 +9,14 @@ import {
   recordAdaptive,
   pickQuestion,
   pickSimilar,
+  getRecentlySeen,
+  recordSeen,
 } from '../lib/quizEngine'
 import { addStars, bumpStreak, logAnswer, unlockNext } from '../lib/progress'
 import { playCorrect, playWrong, playLevelClear, playClick } from '../lib/audio'
 import Mascot from '../components/Mascot'
 import Backdrop from '../components/Backdrop'
+import { speak, speechSupported } from '../lib/speech'
 import MultipleChoice from '../components/questions/MultipleChoice'
 import FillBlank from '../components/questions/FillBlank'
 import Matching from '../components/questions/Matching'
@@ -31,6 +34,9 @@ export default function Quiz({ subject, levelId, go }) {
   const round = useRef(null)
   if (round.current === null) {
     const usedIds = new Set()
+    // 避免同最近幾回合出過嘅題重複(前提係題庫夠大,唔夠就照舊)
+    const recent = getRecentlySeen(subject)
+    if (pool.length - recent.length >= mainTotal + 2) recent.forEach((id) => usedIds.add(id))
     const first = pickQuestion(pool, usedIds, getAdaptive(subject).bias)
     if (first) usedIds.add(first.id)
     round.current = {
@@ -40,6 +46,7 @@ export default function Quiz({ subject, levelId, go }) {
       correctCount: 0,
       starsEarned: 0,
       combo: 0,
+      shownIds: first ? [first.id] : [],
     }
     // eslint-disable-next-line no-underscore-dangle
     round.current._first = first
@@ -55,6 +62,7 @@ export default function Quiz({ subject, levelId, go }) {
     // 用實際答過嘅主題目數做分母:細題庫時加練題會「借走」題目,主題目可能少過 6 條
     const accuracy = r.mainAnswered > 0 ? r.correctCount / r.mainAnswered : 0
     const passed = accuracy >= PASS_RATE
+    recordSeen(subject, r.shownIds) // 記低今回合出過嘅題,下回合儘量唔重複
     bumpStreak()
     if (passed) {
       unlockNext(subject, levelId, LEVELS[subject].length)
@@ -71,7 +79,10 @@ export default function Quiz({ subject, levelId, go }) {
     let isRetry = false
     if (r.mainAnswered < mainTotal) {
       next = pickQuestion(pool, r.usedIds, getAdaptive(subject).bias)
-      if (next) r.usedIds.add(next.id)
+      if (next) {
+        r.usedIds.add(next.id)
+        r.shownIds.push(next.id)
+      }
     }
     if (!next && r.retryQueue.length > 0) {
       next = r.retryQueue.shift()
@@ -188,6 +199,14 @@ export default function Quiz({ subject, levelId, go }) {
           <p className="min-h-[56px] pr-16 text-3xl font-bold leading-relaxed text-slate-800 sm:text-4xl">
             {current.q.question}
           </p>
+          {speechSupported() && (
+            <button
+              onClick={() => speak(current.q.question, subject === 'english' ? 'en-US' : 'zh-HK')}
+              className="kid-btn mt-3 bg-sky-100 px-4 py-2 text-xl text-sky-700 ring-2 ring-sky-200"
+            >
+              🔊 讀題目
+            </button>
+          )}
           <div className="mt-5">
             <QuestionComp key={current.q.id} question={current.q} disabled={phase !== 'question'} onAnswer={handleAnswer} />
           </div>
