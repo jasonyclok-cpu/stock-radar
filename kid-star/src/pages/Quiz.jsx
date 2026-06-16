@@ -13,6 +13,7 @@ import {
 import { addStars, bumpStreak, logAnswer, unlockNext } from '../lib/progress'
 import { playCorrect, playWrong, playLevelClear, playClick } from '../lib/audio'
 import Mascot from '../components/Mascot'
+import Backdrop from '../components/Backdrop'
 import MultipleChoice from '../components/questions/MultipleChoice'
 import FillBlank from '../components/questions/FillBlank'
 import Matching from '../components/questions/Matching'
@@ -152,6 +153,7 @@ export default function Quiz({ subject, levelId, go }) {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-3xl flex-col px-4 pb-6 pt-4">
+      <Backdrop />
       {/* 頂欄:返回、進度、星星 */}
       <header className="flex items-center gap-3">
         <button onClick={() => go('home')} className="kid-btn bg-white px-4 py-2 text-xl text-sky-600">
@@ -265,6 +267,9 @@ function ResultScreen({ subject, levelId, round, go }) {
 
 function CenterCard({ children }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4 py-8">{children}</div>
+    <div className="flex min-h-screen flex-col items-center justify-center px-4 py-8">
+      <Backdrop />
+      {children}
+    </div>
   )
 }

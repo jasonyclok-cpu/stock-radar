@@ -12,7 +12,10 @@ body {
 }
 
 body {
-  @apply bg-sky-200 font-kid text-slate-800;
+  @apply min-h-screen font-kid text-slate-800;
+  /* 由天空藍漸變到草地綠,似一個戶外樂園 */
+  background: linear-gradient(to bottom, #7dd3fc 0%, #bae6fd 45%, #d9f99d 100%);
+  background-attachment: fixed;
   /* iPad 加至主畫面後填滿安全區 */
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
     env(safe-area-inset-left);
@@ -25,6 +28,64 @@ body {
       active:scale-95 active:shadow-sm disabled:opacity-40 disabled:active:scale-100;
   }
   .kid-card {
-    @apply rounded-3xl bg-white shadow-lg;
+    /* 厚身卡片:雙層陰影 + 白邊,似一塊圓角積木 */
+    @apply rounded-[28px] bg-white/95 ring-2 ring-white;
+    box-shadow:
+      0 8px 0 rgba(14, 116, 144, 0.1),
+      0 16px 28px rgba(2, 132, 199, 0.18);
   }
+  /* 主要大掣:糖果立體感,撳落去會「陷」入去 */
+  .candy-btn {
+    @apply rounded-3xl font-extrabold text-white transition;
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.18);
+  }
+  .candy-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18);
+  }
+  /* 漸變標題字 */
+  .title-pop {
+    @apply bg-gradient-to-b from-sky-500 to-blue-700 bg-clip-text font-extrabold text-transparent;
+    -webkit-text-stroke: 2px white;
+    paint-order: stroke fill;
+  }
+}
+
+/* 裝飾動畫 */
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+@keyframes drift {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(40px);
+  }
+}
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.anim-twinkle {
+  animation: twinkle 2.4s ease-in-out infinite;
+}
+.anim-drift {
+  animation: drift 9s ease-in-out infinite alternate;
+}
+.anim-bob {
+  animation: bob 3s ease-in-out infinite;
 }
