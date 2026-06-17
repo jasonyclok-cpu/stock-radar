@@ -25,9 +25,10 @@ import Reorder from '../components/questions/Reorder'
 const PRAISES = ['好叻呀!', '答得好!', '勁呀!', '太棒了!', '叻仔!']
 const COMFORTS = ['唔緊要,睇下點解!', '差少少咋,一齊學下!', '冇問題,下次得!']
 
-export default function Quiz({ subject, levelId, go }) {
-  const pool = useMemo(() => getLevelPool(subject, levelId), [subject, levelId])
-  const level = LEVELS[subject].find((l) => l.id === levelId)
+export default function Quiz({ subject, grade, levelId, go }) {
+  const pool = useMemo(() => getLevelPool(subject, grade, levelId), [subject, grade, levelId])
+  const levelsInGrade = LEVELS[subject][grade]
+  const level = levelsInGrade.find((l) => l.id === levelId)
   const mainTotal = Math.min(ROUND_SIZE, pool.length)
 
   // 回合內可變狀態用 ref,避免事件回呼讀到舊值
@@ -65,7 +66,7 @@ export default function Quiz({ subject, levelId, go }) {
     recordSeen(subject, r.shownIds) // 記低今回合出過嘅題,下回合儘量唔重複
     bumpStreak()
     if (passed) {
-      unlockNext(subject, levelId, LEVELS[subject].length)
+      unlockNext(subject, grade, levelId, levelsInGrade.length)
       playLevelClear()
       confetti({ particleCount: 160, spread: 90, origin: { y: 0.6 } })
       setTimeout(() => confetti({ particleCount: 120, spread: 120, origin: { y: 0.4 } }), 400)
@@ -152,7 +153,7 @@ export default function Quiz({ subject, levelId, go }) {
   }
 
   if (phase === 'result') {
-    return <ResultScreen subject={subject} levelId={levelId} round={round.current} go={go} />
+    return <ResultScreen subject={subject} grade={grade} levelId={levelId} round={round.current} go={go} />
   }
 
   const r = round.current
@@ -243,11 +244,11 @@ export default function Quiz({ subject, levelId, go }) {
   )
 }
 
-function ResultScreen({ subject, levelId, round, go }) {
+function ResultScreen({ subject, grade, levelId, round, go }) {
   const answered = round.mainAnswered || 1
   const accuracy = Math.round((round.correctCount / answered) * 100)
   const passed = round.correctCount / answered >= PASS_RATE
-  const isLastLevel = levelId >= LEVELS[subject].length
+  const isLastLevel = levelId >= LEVELS[subject][grade].length
   return (
     <CenterCard>
       <Mascot mood={passed ? 'cheer' : 'idle'} size={110} />
@@ -271,7 +272,7 @@ function ResultScreen({ subject, levelId, round, go }) {
       </p>
       <div className="mt-6 flex gap-4">
         <button
-          onClick={() => go('quiz', { subject, levelId })}
+          onClick={() => go('quiz', { subject, grade, levelId })}
           className="kid-btn bg-yellow-400 px-8 py-4 text-2xl text-yellow-900"
         >
           {passed ? '再玩一次' : '再試一次'} 🔁

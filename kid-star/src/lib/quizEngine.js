@@ -10,8 +10,9 @@ const BANKS = { math: mathQuestions, chinese: chineseQuestions, english: english
 export const ROUND_SIZE = 6
 export const PASS_RATE = 0.8
 
-export function getLevelPool(subject, levelId) {
-  const level = LEVELS[subject].find((l) => l.id === levelId)
+export function getLevelPool(subject, grade, levelId) {
+  const levels = (LEVELS[subject] && LEVELS[subject][grade]) || []
+  const level = levels.find((l) => l.id === levelId)
   if (!level) return []
   return BANKS[subject].filter((q) => level.topics.includes(q.topic))
 }
