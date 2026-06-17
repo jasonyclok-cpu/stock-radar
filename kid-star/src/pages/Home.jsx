@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { SUBJECTS, LEVELS, GRADES } from '../data/levels'
 import { getStars, getStreak, spendStars, getUnlocked } from '../lib/progress'
 import { load, save } from '../lib/storage'
 import { playClick, playLevelClear } from '../lib/audio'
+import { GAME_COST, gamesByCat } from '../games/registry'
+import { canPlay, recordPlay, cooldownSeconds } from '../lib/playlimit'
 import Mascot from '../components/Mascot'
 import Backdrop from '../components/Backdrop'
-
-const GAME_COST = 10
 
 export default function Home({ go, toast }) {
   const stars = getStars()
@@ -33,15 +33,34 @@ export default function Home({ go, toast }) {
   }
   const cancelPress = () => clearTimeout(pressTimer.current)
 
-  const playGame = (name) => {
-    if (spendStars(GAME_COST)) {
+  const playGame = (game) => {
+    if (game.cost === 0) {
+      // 免費遊戲:5 分鐘最多玩 3 次
+      if (!canPlay(game.id)) {
+        playClick()
+        setMessage(`呢個遊戲玩咗好多次喇,唞 ${Math.max(1, Math.ceil(cooldownSeconds(game.id) / 60))} 分鐘先,試下第二個啦!😊`)
+        return
+      }
+      recordPlay(game.id)
       playLevelClear()
-      go(name)
+      go(game.id)
+      return
+    }
+    // 收費遊戲:10⭐ 入場
+    if (spendStars(game.cost)) {
+      playLevelClear()
+      go(game.id)
     } else {
       playClick()
-      setMessage(`要儲夠 ${GAME_COST} 粒星先可以玩呀!繼續加油!💪`)
+      setMessage(`要儲夠 ${game.cost} 粒星先可以玩呀!繼續加油!💪`)
     }
   }
+
+  // 每次入主頁隨機推介各類 2 個遊戲
+  const featLearn = useMemo(() => sample(gamesByCat('learn'), 2), [])
+  const featFocus = useMemo(() => sample(gamesByCat('focus'), 2), [])
+  const [showAllLearn, setShowAllLearn] = useState(false)
+  const [showAllFocus, setShowAllFocus] = useState(false)
 
   return (
     <div className="mx-auto min-h-screen max-w-5xl px-4 pb-10 pt-4">
@@ -111,131 +130,95 @@ export default function Home({ go, toast }) {
         ))}
       </main>
 
-      {/* 小遊戲 */}
-      <section className="mt-8">
-        <h2 className="title-pop text-3xl">🎮 小遊戲樂園</h2>
-        <p className="mt-1 text-lg font-bold text-sky-700">限時心算免費玩,做得好仲有星星!</p>
-        <div className="mt-3 grid gap-4 sm:grid-cols-2">
-          <GameCard
-            emoji="⚡"
-            title="限時心算"
-            desc="60 秒鬥快計數,賺星星!"
-            from="from-amber-400"
-            to="to-orange-500"
-            badge="免費玩"
-            onClick={() => {
-              playClick()
-              go('mathgame')
-            }}
-          />
-          <GameCard
-            emoji="🃏"
-            title="記憶配對"
-            desc="翻卡配對中英文詞語,翻牌仲會讀出嚟!"
-            from="from-violet-400"
-            to="to-fuchsia-500"
-            badge={`⭐ ${GAME_COST}`}
-            locked={stars < GAME_COST}
-            onClick={() => playGame('memory')}
-          />
-        </div>
+      {/* 學習小遊戲:每次隨機推介 2 個,其餘可展開 */}
+      <GameSection
+        title="🎮 小遊戲樂園"
+        subtitle="每次隨機推介 2 個!免費遊戲做得好賺星星 ⭐"
+        cat="learn"
+        featured={featLearn}
+        showAll={showAllLearn}
+        setShowAll={setShowAllLearn}
+        stars={stars}
+        onPlay={playGame}
+      />
 
-        <h3 className="mt-6 text-2xl font-extrabold text-sky-700">🧠 專注力大挑戰</h3>
-        <p className="mt-1 text-lg font-bold text-sky-700">考眼力同記性,越玩越叻!</p>
-        <div className="mt-3 grid gap-4 sm:grid-cols-2">
-          <GameCard
-            emoji="🔢"
-            title="數字快搜"
-            desc="由細到大,順住點晒啲數字!"
-            from="from-sky-400"
-            to="to-cyan-500"
-            badge={`⭐ ${GAME_COST}`}
-            locked={stars < GAME_COST}
-            onClick={() => playGame('schulte')}
-          />
-          <GameCard
-            emoji="🚦"
-            title="紅綠燈"
-            desc="綠燈快啲撳,紅燈唔好撳!"
-            from="from-green-400"
-            to="to-emerald-500"
-            badge={`⭐ ${GAME_COST}`}
-            locked={stars < GAME_COST}
-            onClick={() => playGame('traffic')}
-          />
-          <GameCard
-            emoji="🧠"
-            title="記憶翻牌"
-            desc="睇清楚就蓋牌,搵返成對圖案!"
-            from="from-rose-400"
-            to="to-pink-500"
-            badge={`⭐ ${GAME_COST}`}
-            locked={stars < GAME_COST}
-            onClick={() => playGame('memoryplus')}
-          />
-          <GameCard
-            emoji="👂"
-            title="聽指令"
-            desc="聽小星講,做啱動作!"
-            from="from-teal-400"
-            to="to-cyan-500"
-            badge={`⭐ ${GAME_COST}`}
-            locked={stars < GAME_COST}
-            onClick={() => playGame('listen')}
-          />
-          <GameCard
-            emoji="🎶"
-            title="圖案接龍"
-            desc="記住啲燈,順住次序㩒返!"
-            from="from-indigo-400"
-            to="to-blue-500"
-            badge={`⭐ ${GAME_COST}`}
-            locked={stars < GAME_COST}
-            onClick={() => playGame('sequence')}
-          />
-          <GameCard
-            emoji="🔍"
-            title="找不同"
-            desc="比較兩幅圖,搵出唔同嘅地方!"
-            from="from-lime-400"
-            to="to-green-500"
-            badge={`⭐ ${GAME_COST}`}
-            locked={stars < GAME_COST}
-            onClick={() => playGame('spot')}
-          />
-          <GameCard
-            emoji="🧩"
-            title="走迷宮"
-            desc="用手指由起點行去終點,唔好掂牆!"
-            from="from-orange-400"
-            to="to-amber-500"
-            badge={`⭐ ${GAME_COST}`}
-            locked={stars < GAME_COST}
-            onClick={() => playGame('maze')}
-          />
-        </div>
-      </section>
+      {/* 專注力遊戲:同樣隨機推介 2 個 */}
+      <GameSection
+        title="🧠 專注力大挑戰"
+        subtitle="每次隨機推介 2 個!考眼力、記性同反應!"
+        cat="focus"
+        featured={featFocus}
+        showAll={showAllFocus}
+        setShowAll={setShowAllFocus}
+        stars={stars}
+        onPlay={playGame}
+      />
     </div>
   )
 }
 
-function GameCard({ emoji, title, desc, from, to, badge, locked, onClick }) {
+// 隨機抽 n 個
+function sample(arr, n) {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a.slice(0, n)
+}
+
+function GameSection({ title, subtitle, cat, featured, showAll, setShowAll, stars, onPlay }) {
+  const featIds = new Set(featured.map((g) => g.id))
+  const rest = gamesByCat(cat).filter((g) => !featIds.has(g.id))
+  return (
+    <section className="mt-8">
+      <h2 className="title-pop text-3xl">{title}</h2>
+      <p className="mt-1 text-lg font-bold text-sky-700">{subtitle}</p>
+      <div className="mt-3 grid gap-4 sm:grid-cols-2">
+        {featured.map((g) => (
+          <GameCard key={g.id} game={g} stars={stars} onPlay={onPlay} />
+        ))}
+      </div>
+      {rest.length > 0 && (
+        <>
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className="kid-btn mt-3 bg-white px-5 py-2 text-lg font-bold text-sky-600"
+          >
+            {showAll ? '收起 ▲' : `仲有 ${rest.length} 個遊戲 ▼`}
+          </button>
+          {showAll && (
+            <div className="mt-3 grid gap-4 sm:grid-cols-2">
+              {rest.map((g) => (
+                <GameCard key={g.id} game={g} stars={stars} onPlay={onPlay} />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </section>
+  )
+}
+
+function GameCard({ game, stars, onPlay }) {
+  const free = game.cost === 0
+  const locked = !free && stars < game.cost
   return (
     <button
-      onClick={onClick}
-      className={`candy-btn flex items-center gap-4 bg-gradient-to-br ${from} ${to} p-5 text-left ${
+      onClick={() => onPlay(game)}
+      className={`candy-btn flex items-center gap-4 bg-gradient-to-br ${game.from} ${game.to} p-5 text-left ${
         locked ? 'opacity-60' : ''
       }`}
     >
       <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/30 text-4xl">
-        {emoji}
+        {game.emoji}
       </span>
       <span>
-        <span className="block text-2xl font-extrabold text-white drop-shadow">{title}</span>
-        <span className="block text-base text-white/90">{desc}</span>
+        <span className="block text-2xl font-extrabold text-white drop-shadow">{game.title}</span>
+        <span className="block text-base text-white/90">{game.desc}</span>
       </span>
       <span className="ml-auto shrink-0 rounded-full bg-white/90 px-3 py-1 text-lg font-extrabold text-amber-600">
-        {badge}
+        {free ? '免費' : `⭐ ${game.cost}`}
       </span>
     </button>
   )
