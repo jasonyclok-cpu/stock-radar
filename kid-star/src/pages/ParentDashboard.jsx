@@ -172,9 +172,18 @@ function FocusSection({ focus }) {
   const lastReaction = reaction[reaction.length - 1]
   const bestMemoryGrid = memory.reduce((b, r) => (gridRank(r.grid) > gridRank(b) ? r.grid : b), '—')
 
+  const listen = focus.listen || []
+  const sequence = focus.sequence || []
+  const lastListen = listen[listen.length - 1]
+  const listenAcc =
+    lastListen && lastListen.correct + lastListen.wrong > 0
+      ? Math.round((lastListen.correct / (lastListen.correct + lastListen.wrong)) * 100)
+      : null
+  const bestSeq = sequence.reduce((m, r) => Math.max(m, r.len || 0), 0)
+
   const fmt = (ms) => (ms == null ? '—' : (ms / 1000).toFixed(1) + ' 秒')
 
-  const empty = !schulte.length && !reaction.length && !memory.length
+  const empty = !schulte.length && !reaction.length && !memory.length && !listen.length && !sequence.length
 
   return (
     <section className="mt-5">
@@ -204,6 +213,17 @@ function FocusSection({ focus }) {
             <p className="font-bold text-sky-700">🧠 記憶翻牌</p>
             <p className="mt-1 text-sm text-slate-600">最大完成格數:{bestMemoryGrid}</p>
             <p className="mt-1 text-xs text-slate-400">共玩 {memory.length} 次</p>
+          </div>
+          <div className="kid-card p-4">
+            <p className="font-bold text-sky-700">👂 聽指令(最近一次)</p>
+            <p className="mt-1 text-sm text-slate-600">正確率:{listenAcc == null ? '—' : listenAcc + '%'}</p>
+            <p className="text-sm text-slate-600">錯點:{lastListen ? lastListen.wrong : '—'} 次</p>
+            <p className="mt-1 text-xs text-slate-400">共玩 {listen.length} 次</p>
+          </div>
+          <div className="kid-card p-4">
+            <p className="font-bold text-sky-700">🎶 圖案接龍</p>
+            <p className="mt-1 text-sm text-slate-600">最長序列:{bestSeq || '—'} 個</p>
+            <p className="mt-1 text-xs text-slate-400">共玩 {sequence.length} 次</p>
           </div>
         </div>
       )}
