@@ -194,9 +194,28 @@ math: {
 | 🧠 記憶翻牌 | 短暫預覽後蓋牌,搵返成對圖案 | 4×4 → 4×5 | 可完成嘅最大格數 |
 | 👂 聽指令 | zh-HK 語音 + 文字讀出指令(含「要做 / 不要做」),點啱啲彩色形狀 | 第 4 回合起加「不要做」、加形狀 | 正確率、錯點次數 |
 | 🎶 圖案接龍 | 閃示彩色圖案(同時讀出顏色),順序點返;答對序列加長 | 答啱長一位 | 可達到嘅最長序列 |
+| 🔍 找不同 | 並排兩幅 emoji 場景,搵出 3-5 處不同,點中高亮 | level 越高差異越多、換場景 | 找對數、錯點次數 |
+| 🧩 走迷宮 | Canvas 迷宮,手指由起點拖去終點,碰牆即重來 | 迷宮 6→8→10 越嚟越大 | 碰牆次數、完成時間 |
 
 - 語音用 `src/lib/speech.js` 嘅 `speak(text, 'zh-HK')`;裝置唔支援語音時自動以文字降級
-- 遊戲元件喺 `src/games/`(`SchulteTable.jsx`、`TrafficLight.jsx`、`MemoryFlipAdvanced.jsx`、`ListenAndDo.jsx`、`SequenceRecall.jsx`)
+- 「找不同」場景喺 `src/data/spotScenes.js`,加場景方法檔案內有說明(加一個 `{name, cols, base, pool}` 物件)
+- 遊戲元件喺 `src/games/`(`SchulteTable`、`TrafficLight`、`MemoryFlipAdvanced`、`ListenAndDo`、`SequenceRecall`、`SpotDifference`、`Maze`)
+
+### 家長後台「🧠 專注力分析」分頁(小朋友睇唔到)
+
+讀取以上遊戲嘅靜默記錄,計**近兩週趨勢**(最近 7 日 vs 之前 7 日,↑進步 / →持平 / ↓退步 + 白話解讀):
+
+| 指標 | 來源 | 意思 |
+|---|---|---|
+| 平均反應時間 | 紅綠燈、舒爾特 | 反應快唔快 |
+| 反應穩定度 | 反應時間波動 | 係咪時快時慢 |
+| 持續力 | 一回合前半 vs 後半 | 撐唔撐得耐 |
+| 抑制控制 | 紅綠燈、聽指令誤觸率 | 忍唔忍到手亂撳 |
+| 工作記憶廣度 | 接龍最長序列、翻牌格數 | 記得到幾多 |
+
+- 分析邏輯喺 `src/lib/analysis.js`(`buildAnalysis(focus)`)
+- **備份 / 匯出**:家長後台有「⬇️ 匯出備份 / ⬆️ 匯入備份」,匯出全部 `starschool_` 資料做 JSON,換機可還原(`src/lib/storage.js` 嘅 `exportAll` / `importAll`)
+- 目前單一 Profile(即呢部裝置嘅資料);如要多個小朋友分開記錄,可日後加 Profile 切換
 - 靜默紀錄經 `src/lib/focus.js`(`recordFocus` / `getFocus`)存喺 localStorage(`starschool_focus`),沿用現有 Profile 結構
 - 鼓勵文案喺 `src/lib/encourage.js`(成長型思維,讚努力唔講分數)
 - 翻牌圖案喺 `src/data/focusCards.js`(加 emoji 就得)
@@ -211,3 +230,13 @@ math: {
 6. **錯題重練模式**:家長後台一掣生成「錯題特訓」回合
 7. **數據匯出/同步**:匯出 JSON 或接 Firebase,換機唔會冇晒進度
 8. **更多小遊戲**:句子接龍、聽寫等,維持新鮮感
+9. **多 Profile**:俾幾個小朋友各自一份進度同專注力紀錄,分開分析
+
+### 後續可加嘅專注力遊戲建議
+
+- **Stroop 字色遊戲**:字寫「紅」但係藍色,要揀顏色唔係字 —— 練抑制控制
+- **聲音方向 / 聽聲記序**:純聽覺版接龍,練聽覺工作記憶(配合 zh-HK 語音)
+- **持續注意(CPT)**:一連串圖案中,淨係特定目標出現先撳,練持續專注
+- **雙重任務**:一邊數星星一邊避障,練分配注意力
+- **N-back**:睇住一串,要記住「兩個之前」嗰個 —— 練高階工作記憶
+- **節奏拍打**:跟住節奏拍,練時間知覺同自我調節

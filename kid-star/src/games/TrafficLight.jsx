@@ -59,8 +59,20 @@ export default function TrafficLight({ go }) {
     clearTimers()
     setOver(true)
     const rts = rtsRef.current
-    const avg = rts.length ? Math.round(rts.reduce((a, b) => a + b, 0) / rts.length) : null
-    recordFocus('reaction', { avgMs: avg, hits: rts.length, falseTaps: falseRef.current })
+    const n = rts.length
+    const mean = n ? rts.reduce((a, b) => a + b, 0) / n : null
+    const sd = n > 1 ? Math.sqrt(rts.reduce((s, x) => s + (x - mean) ** 2, 0) / n) : null
+    const half = Math.floor(n / 2)
+    const firstAvg = half ? Math.round(rts.slice(0, half).reduce((a, b) => a + b, 0) / half) : null
+    const secondAvg = n - half ? Math.round(rts.slice(half).reduce((a, b) => a + b, 0) / (n - half)) : null
+    recordFocus('reaction', {
+      avgMs: mean != null ? Math.round(mean) : null,
+      sdMs: sd != null ? Math.round(sd) : null,
+      hits: n,
+      falseTaps: falseRef.current,
+      firstAvg,
+      secondAvg,
+    })
     playLevelClear()
     confetti({ particleCount: 110, spread: 80, origin: { y: 0.5 } })
   }

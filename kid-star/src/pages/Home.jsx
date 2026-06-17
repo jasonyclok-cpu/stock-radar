@@ -193,6 +193,26 @@ export default function Home({ go, toast }) {
             locked={stars < GAME_COST}
             onClick={() => playGame('sequence')}
           />
+          <GameCard
+            emoji="🔍"
+            title="找不同"
+            desc="比較兩幅圖,搵出唔同嘅地方!"
+            from="from-lime-400"
+            to="to-green-500"
+            badge={`⭐ ${GAME_COST}`}
+            locked={stars < GAME_COST}
+            onClick={() => playGame('spot')}
+          />
+          <GameCard
+            emoji="🧩"
+            title="走迷宮"
+            desc="用手指由起點行去終點,唔好掂牆!"
+            from="from-orange-400"
+            to="to-amber-500"
+            badge={`⭐ ${GAME_COST}`}
+            locked={stars < GAME_COST}
+            onClick={() => playGame('maze')}
+          />
         </div>
       </section>
     </div>
