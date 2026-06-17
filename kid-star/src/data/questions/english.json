@@ -757,5 +757,137 @@
     "options": ["Where", "Who", "What"],
     "answer": "Where",
     "explanation": "問「去邊度」用 Where:Where are you going?"
+  },
+  {
+    "id": "e1-this-001",
+    "subject": "english",
+    "topic": "this/that",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "___ is a cat. (指住近近哋嘅嘢)",
+    "options": ["This", "That"],
+    "answer": "This",
+    "explanation": "近嘅嘢用 This:This is a cat。"
+  },
+  {
+    "id": "e1-this-002",
+    "subject": "english",
+    "topic": "this/that",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "___ is a dog. (指住遠遠哋嘅嘢)",
+    "options": ["That", "This"],
+    "answer": "That",
+    "explanation": "遠嘅嘢用 That:That is a dog。"
+  },
+  {
+    "id": "e1-this-003",
+    "subject": "english",
+    "topic": "this/that",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "___ is my pen. (喺手上,好近)",
+    "options": ["This", "That"],
+    "answer": "This",
+    "explanation": "喺手上、好近,用 This。"
+  },
+  {
+    "id": "e1-this-004",
+    "subject": "english",
+    "topic": "this/that",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "___ is a bird in the sky. (天上,好遠)",
+    "options": ["That", "This"],
+    "answer": "That",
+    "explanation": "天上好遠,用 That。"
+  },
+  {
+    "id": "e1-this-005",
+    "subject": "english",
+    "topic": "this/that",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "___ are my books. (近,多過一本)",
+    "options": ["These", "This"],
+    "answer": "These",
+    "explanation": "近 + 多過一個,用 These(this 嘅複數)。"
+  },
+  {
+    "id": "e1-this-006",
+    "subject": "english",
+    "topic": "this/that",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "___ are your toys. (遠,多過一個)",
+    "options": ["Those", "That"],
+    "answer": "Those",
+    "explanation": "遠 + 多過一個,用 Those(that 嘅複數)。"
+  },
+  {
+    "id": "e1-col-001",
+    "subject": "english",
+    "topic": "顏色數字",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "「紅色」嘅英文係?🔴",
+    "options": ["red", "blue", "green", "yellow"],
+    "answer": "red",
+    "explanation": "紅色係 red。"
+  },
+  {
+    "id": "e1-col-002",
+    "subject": "english",
+    "topic": "顏色數字",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "「藍色」嘅英文係?🔵",
+    "options": ["blue", "red", "black", "white"],
+    "answer": "blue",
+    "explanation": "藍色係 blue。"
+  },
+  {
+    "id": "e1-col-003",
+    "subject": "english",
+    "topic": "顏色數字",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "「三」嘅英文係?3️⃣",
+    "options": ["three", "two", "tree", "free"],
+    "answer": "three",
+    "explanation": "3 係 three(留意唔係 tree 樹)。"
+  },
+  {
+    "id": "e1-col-004",
+    "subject": "english",
+    "topic": "顏色數字",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "「黃色」嘅英文係?🟡",
+    "options": ["yellow", "yallow", "yellaw", "jello"],
+    "answer": "yellow",
+    "explanation": "黃色係 yellow:y-e-l-l-o-w。"
+  },
+  {
+    "id": "e1-col-005",
+    "subject": "english",
+    "topic": "顏色數字",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "「五」嘅英文係?5️⃣",
+    "options": ["five", "four", "fife", "nine"],
+    "answer": "five",
+    "explanation": "5 係 five。"
+  },
+  {
+    "id": "e1-col-006",
+    "subject": "english",
+    "topic": "顏色數字",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "「綠色」嘅英文係?🟢",
+    "options": ["green", "grin", "gren", "greem"],
+    "answer": "green",
+    "explanation": "綠色係 green:g-r-e-e-n。"
   }
 ]

@@ -12,8 +12,8 @@ export default function Home({ go, toast }) {
   const stars = getStars()
   const streak = getStreak()
   const [message, setMessage] = useState(toast || '')
-  // 記住上次揀嘅年級
-  const [grade, setGrade] = useState(() => load('grade', GRADES[0].id))
+  // 記住上次揀嘅年級(預設小二)
+  const [grade, setGrade] = useState(() => load('grade', '小二'))
   const pickGrade = (g) => {
     playClick()
     setGrade(g)
@@ -114,15 +114,27 @@ export default function Home({ go, toast }) {
       {/* 小遊戲 */}
       <section className="mt-8">
         <h2 className="title-pop text-3xl">🎮 小遊戲樂園</h2>
-        <p className="mt-1 text-lg font-bold text-sky-700">用 {GAME_COST} 粒 ⭐ 玩一次!</p>
-        <div className="mt-3">
+        <p className="mt-1 text-lg font-bold text-sky-700">限時心算免費玩,做得好仲有星星!</p>
+        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+          <GameCard
+            emoji="⚡"
+            title="限時心算"
+            desc="60 秒鬥快計數,賺星星!"
+            from="from-amber-400"
+            to="to-orange-500"
+            badge="免費玩"
+            onClick={() => {
+              playClick()
+              go('mathgame')
+            }}
+          />
           <GameCard
             emoji="🃏"
             title="記憶配對"
             desc="翻卡配對中英文詞語,翻牌仲會讀出嚟!"
             from="from-violet-400"
             to="to-fuchsia-500"
-            cost={GAME_COST}
+            badge={`⭐ ${GAME_COST}`}
             locked={stars < GAME_COST}
             onClick={() => playGame('memory')}
           />
@@ -132,7 +144,7 @@ export default function Home({ go, toast }) {
   )
 }
 
-function GameCard({ emoji, title, desc, from, to, cost, locked, onClick }) {
+function GameCard({ emoji, title, desc, from, to, badge, locked, onClick }) {
   return (
     <button
       onClick={onClick}
@@ -148,7 +160,7 @@ function GameCard({ emoji, title, desc, from, to, cost, locked, onClick }) {
         <span className="block text-base text-white/90">{desc}</span>
       </span>
       <span className="ml-auto shrink-0 rounded-full bg-white/90 px-3 py-1 text-lg font-extrabold text-amber-600">
-        ⭐ {cost}
+        {badge}
       </span>
     </button>
   )

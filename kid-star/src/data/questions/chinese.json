@@ -820,5 +820,143 @@
     "options": ["天空很藍很美。", "白雲像棉花。", "湖水像鏡子。", "她的笑容像花。"],
     "answer": "天空很藍很美。",
     "explanation": "「天空很藍很美」只係直接形容,冇用「像」把佢當成另一樣嘢,所以唔係比喻。"
+  },
+  {
+    "id": "c1-pron-001",
+    "subject": "chinese",
+    "topic": "人稱代詞",
+    "difficulty": 1,
+    "type": "fill_blank",
+    "inputMode": "choices",
+    "choices": ["他", "你", "我們", "他們"],
+    "question": "弟弟自己喺公園玩,__ 玩得好開心。",
+    "answer": "他",
+    "explanation": "講一個男仔(弟弟),用「他」。"
+  },
+  {
+    "id": "c1-pron-002",
+    "subject": "chinese",
+    "topic": "人稱代詞",
+    "difficulty": 1,
+    "type": "fill_blank",
+    "inputMode": "choices",
+    "choices": ["我", "他", "你", "他們"],
+    "question": "妹妹說:「__ 最喜歡吃蘋果。」",
+    "answer": "我",
+    "explanation": "妹妹講自己,用「我」。"
+  },
+  {
+    "id": "c1-pron-003",
+    "subject": "chinese",
+    "topic": "人稱代詞",
+    "difficulty": 2,
+    "type": "fill_blank",
+    "inputMode": "choices",
+    "choices": ["我們", "他", "你", "它"],
+    "question": "上中文課時,__ 都很留心聽。(全班同學連自己)",
+    "answer": "我們",
+    "explanation": "包括自己同其他人(一班人),用「我們」。"
+  },
+  {
+    "id": "c1-pron-004",
+    "subject": "chinese",
+    "topic": "人稱代詞",
+    "difficulty": 2,
+    "type": "fill_blank",
+    "inputMode": "choices",
+    "choices": ["他們", "他", "我", "你們"],
+    "question": "爸爸和媽媽放工了,__ 很晚才回家。",
+    "answer": "他們",
+    "explanation": "講多過一個人(爸爸同媽媽),用「他們」。"
+  },
+  {
+    "id": "c1-pron-005",
+    "subject": "chinese",
+    "topic": "人稱代詞",
+    "difficulty": 1,
+    "type": "fill_blank",
+    "inputMode": "choices",
+    "choices": ["你", "我", "他", "它"],
+    "question": "老師問:「__ 叫甚麼名字?」(問緊面前嗰位)",
+    "answer": "你",
+    "explanation": "問住面前嗰個人,用「你」。"
+  },
+  {
+    "id": "c1-pron-006",
+    "subject": "chinese",
+    "topic": "人稱代詞",
+    "difficulty": 3,
+    "type": "fill_blank",
+    "inputMode": "choices",
+    "choices": ["牠", "他", "你", "我"],
+    "question": "小貓很可愛,__ 正在睡覺。",
+    "answer": "牠",
+    "explanation": "講動物(小貓),用「牠」(有個「牛」字邊)。人先用「他」。"
+  },
+  {
+    "id": "c1-name-001",
+    "subject": "chinese",
+    "topic": "專名號",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "下面邊個詞係地名,要加專名號?",
+    "options": ["香港", "蘋果", "開心", "跑步"],
+    "answer": "香港",
+    "explanation": "「香港」係地方名,屬於專有名詞,要加專名號。"
+  },
+  {
+    "id": "c1-name-002",
+    "subject": "chinese",
+    "topic": "專名號",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "邊個係地方名,要加專名號?",
+    "options": ["海洋公園", "雪糕", "睡覺", "美麗"],
+    "answer": "海洋公園",
+    "explanation": "「海洋公園」係一個特定地方嘅名,要加專名號。"
+  },
+  {
+    "id": "c1-name-003",
+    "subject": "chinese",
+    "topic": "專名號",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "邊個係人名,要加專名號?",
+    "options": ["陳大文", "老師", "朋友", "同學"],
+    "answer": "陳大文",
+    "explanation": "「陳大文」係一個人嘅名,要加專名號。「老師、朋友」係普通稱呼,唔使。"
+  },
+  {
+    "id": "c1-name-004",
+    "subject": "chinese",
+    "topic": "專名號",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "下面邊個詞唔使加專名號?",
+    "options": ["街市", "中國", "北京", "李小明"],
+    "answer": "街市",
+    "explanation": "「街市」係普通名詞,唔係特定名;「中國、北京、李小明」係專有名,要加。"
+  },
+  {
+    "id": "c1-name-005",
+    "subject": "chinese",
+    "topic": "專名號",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "邊個係特定地方名,要加專名號?",
+    "options": ["長城", "橋", "河", "山"],
+    "answer": "長城",
+    "explanation": "「長城」係一個特定地方嘅名,要加專名號;「橋、河、山」係普通名詞。"
+  },
+  {
+    "id": "c1-name-006",
+    "subject": "chinese",
+    "topic": "專名號",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "下面邊個詞唔使加專名號?",
+    "options": ["公園", "迪士尼樂園", "廣州", "張小明"],
+    "answer": "公園",
+    "explanation": "「公園」係普通名詞;「迪士尼樂園、廣州、張小明」都係專有名,要加專名號。"
   }
 ]
