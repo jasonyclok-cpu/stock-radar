@@ -139,6 +139,41 @@ export default function Home({ go, toast }) {
             onClick={() => playGame('memory')}
           />
         </div>
+
+        <h3 className="mt-6 text-2xl font-extrabold text-sky-700">🧠 專注力大挑戰</h3>
+        <p className="mt-1 text-lg font-bold text-sky-700">考眼力同記性,越玩越叻!</p>
+        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+          <GameCard
+            emoji="🔢"
+            title="數字快搜"
+            desc="由細到大,順住點晒啲數字!"
+            from="from-sky-400"
+            to="to-cyan-500"
+            badge={`⭐ ${GAME_COST}`}
+            locked={stars < GAME_COST}
+            onClick={() => playGame('schulte')}
+          />
+          <GameCard
+            emoji="🚦"
+            title="紅綠燈"
+            desc="綠燈快啲撳,紅燈唔好撳!"
+            from="from-green-400"
+            to="to-emerald-500"
+            badge={`⭐ ${GAME_COST}`}
+            locked={stars < GAME_COST}
+            onClick={() => playGame('traffic')}
+          />
+          <GameCard
+            emoji="🧠"
+            title="記憶翻牌"
+            desc="睇清楚就蓋牌,搵返成對圖案!"
+            from="from-rose-400"
+            to="to-pink-500"
+            badge={`⭐ ${GAME_COST}`}
+            locked={stars < GAME_COST}
+            onClick={() => playGame('memoryplus')}
+          />
+        </div>
       </section>
     </div>
   )
