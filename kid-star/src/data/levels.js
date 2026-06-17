@@ -9,12 +9,17 @@ export const SUBJECTS = [
 
 // 年級組別(自由切換)
 export const GRADES = [
+  { id: '小一', name: '小一', emoji: '🐥' },
   { id: '小二', name: '小二', emoji: '🐣' },
   { id: '小三', name: '小三', emoji: '🦉' },
 ]
 
 export const LEVELS = {
   math: {
+    小一: [
+      { id: 1, name: '星期月曆', emoji: '📅', topics: ['星期和月曆'] },
+      { id: 2, name: '圖形樂園', emoji: '🔺', topics: ['平面圖形'] },
+    ],
     小二: [
       { id: 1, name: '加法小路', emoji: '➕', topics: ['兩位數加法'] },
       { id: 2, name: '減法森林', emoji: '➖', topics: ['兩位數減法'] },
@@ -23,7 +28,9 @@ export const LEVELS = {
       { id: 5, name: '星星挑戰', emoji: '🌟', topics: ['兩位數加法', '兩位數減法', '乘法表', '看時鐘'] },
       { id: 6, name: '乘法山谷', emoji: '✖️', topics: ['乘法表(3、4)'] },
       { id: 7, name: '金錢小舖', emoji: '💰', topics: ['認識金錢'] },
-      { id: 8, name: '終極挑戰', emoji: '👑', topics: ['兩位數加法', '兩位數減法', '乘法表', '看時鐘', '乘法表(3、4)', '認識金錢'] },
+      { id: 8, name: '應用題森林', emoji: '🌲', topics: ['加減應用題'] },
+      { id: 9, name: '乘法表 6-9', emoji: '✖️', topics: ['乘法表(6、7、8、9)'] },
+      { id: 10, name: '終極挑戰', emoji: '👑', topics: ['兩位數加法', '兩位數減法', '乘法表', '看時鐘', '乘法表(3、4)', '認識金錢', '加減應用題', '乘法表(6、7、8、9)'] },
     ],
     小三: [
       { id: 1, name: '三位數加法', emoji: '➕', topics: ['三位數加法'] },
@@ -34,6 +41,10 @@ export const LEVELS = {
     ],
   },
   chinese: {
+    小一: [
+      { id: 1, name: '人稱代詞', emoji: '🙋', topics: ['人稱代詞'] },
+      { id: 2, name: '專名號', emoji: '📍', topics: ['專名號'] },
+    ],
     小二: [
       { id: 1, name: '量詞樂園', emoji: '🐶', topics: ['量詞'] },
       { id: 2, name: '配對小屋', emoji: '🔗', topics: ['詞語配對'] },
@@ -52,6 +63,10 @@ export const LEVELS = {
     ],
   },
   english: {
+    小一: [
+      { id: 1, name: '顏色數字', emoji: '🌈', topics: ['顏色數字'] },
+      { id: 2, name: 'this / that', emoji: '👉', topics: ['this/that'] },
+    ],
     小二: [
       { id: 1, name: '拼字海灘', emoji: '🏖️', topics: ['拼寫'] },
       { id: 2, name: 'a/an 果園', emoji: '🍎', topics: ['a/an 用法'] },

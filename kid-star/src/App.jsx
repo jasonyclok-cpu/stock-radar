@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Home from './pages/Home'
 import Quiz from './pages/Quiz'
 import MemoryMatch from './pages/MemoryMatch'
+import MathGame from './pages/MathGame'
 import ParentDashboard from './pages/ParentDashboard'
 
 export default function App() {
@@ -23,6 +24,8 @@ export default function App() {
       )
     case 'memory':
       return <MemoryMatch key={screen.nonce} go={go} />
+    case 'mathgame':
+      return <MathGame key={screen.nonce} go={go} />
     case 'parent':
       return <ParentDashboard go={go} />
     default:
