@@ -173,6 +173,26 @@ export default function Home({ go, toast }) {
             locked={stars < GAME_COST}
             onClick={() => playGame('memoryplus')}
           />
+          <GameCard
+            emoji="👂"
+            title="聽指令"
+            desc="聽小星講,做啱動作!"
+            from="from-teal-400"
+            to="to-cyan-500"
+            badge={`⭐ ${GAME_COST}`}
+            locked={stars < GAME_COST}
+            onClick={() => playGame('listen')}
+          />
+          <GameCard
+            emoji="🎶"
+            title="圖案接龍"
+            desc="記住啲燈,順住次序㩒返!"
+            from="from-indigo-400"
+            to="to-blue-500"
+            badge={`⭐ ${GAME_COST}`}
+            locked={stars < GAME_COST}
+            onClick={() => playGame('sequence')}
+          />
         </div>
       </section>
     </div>

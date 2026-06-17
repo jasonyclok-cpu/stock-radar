@@ -6,6 +6,8 @@ import MathGame from './pages/MathGame'
 import SchulteTable from './games/SchulteTable'
 import TrafficLight from './games/TrafficLight'
 import MemoryFlipAdvanced from './games/MemoryFlipAdvanced'
+import ListenAndDo from './games/ListenAndDo'
+import SequenceRecall from './games/SequenceRecall'
 import ParentDashboard from './pages/ParentDashboard'
 
 export default function App() {
@@ -35,6 +37,10 @@ export default function App() {
       return <TrafficLight key={screen.nonce} go={go} />
     case 'memoryplus':
       return <MemoryFlipAdvanced key={screen.nonce} go={go} />
+    case 'listen':
+      return <ListenAndDo key={screen.nonce} go={go} />
+    case 'sequence':
+      return <SequenceRecall key={screen.nonce} go={go} />
     case 'parent':
       return <ParentDashboard go={go} />
     default:

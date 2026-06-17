@@ -192,8 +192,11 @@ math: {
 | 🔢 數字快搜(舒爾特方格) | 亂序 1..N²,順序點擊;點錯只搖晃唔扣分 | 3×3 → 4×4 → 5×5 | 各格數最快完成時間 |
 | 🚦 紅綠燈 | 綠燈快撳、紅燈唔好撳;60 秒一回合 | 表現好會加速出燈 | 平均反應時間、紅燈誤點次數 |
 | 🧠 記憶翻牌 | 短暫預覽後蓋牌,搵返成對圖案 | 4×4 → 4×5 | 可完成嘅最大格數 |
+| 👂 聽指令 | zh-HK 語音 + 文字讀出指令(含「要做 / 不要做」),點啱啲彩色形狀 | 第 4 回合起加「不要做」、加形狀 | 正確率、錯點次數 |
+| 🎶 圖案接龍 | 閃示彩色圖案(同時讀出顏色),順序點返;答對序列加長 | 答啱長一位 | 可達到嘅最長序列 |
 
-- 遊戲元件喺 `src/games/`(`SchulteTable.jsx`、`TrafficLight.jsx`、`MemoryFlipAdvanced.jsx`)
+- 語音用 `src/lib/speech.js` 嘅 `speak(text, 'zh-HK')`;裝置唔支援語音時自動以文字降級
+- 遊戲元件喺 `src/games/`(`SchulteTable.jsx`、`TrafficLight.jsx`、`MemoryFlipAdvanced.jsx`、`ListenAndDo.jsx`、`SequenceRecall.jsx`)
 - 靜默紀錄經 `src/lib/focus.js`(`recordFocus` / `getFocus`)存喺 localStorage(`starschool_focus`),沿用現有 Profile 結構
 - 鼓勵文案喺 `src/lib/encourage.js`(成長型思維,讚努力唔講分數)
 - 翻牌圖案喺 `src/data/focusCards.js`(加 emoji 就得)
