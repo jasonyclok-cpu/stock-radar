@@ -8,6 +8,8 @@ import TrafficLight from './games/TrafficLight'
 import MemoryFlipAdvanced from './games/MemoryFlipAdvanced'
 import ListenAndDo from './games/ListenAndDo'
 import SequenceRecall from './games/SequenceRecall'
+import SpotDifference from './games/SpotDifference'
+import Maze from './games/Maze'
 import ParentDashboard from './pages/ParentDashboard'
 
 export default function App() {
@@ -41,6 +43,10 @@ export default function App() {
       return <ListenAndDo key={screen.nonce} go={go} />
     case 'sequence':
       return <SequenceRecall key={screen.nonce} go={go} />
+    case 'spot':
+      return <SpotDifference key={screen.nonce} go={go} />
+    case 'maze':
+      return <Maze key={screen.nonce} go={go} />
     case 'parent':
       return <ParentDashboard go={go} />
     default:

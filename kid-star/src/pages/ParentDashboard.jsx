@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { getAnswerLog } from '../lib/progress'
 import { getFocus } from '../lib/focus'
-import { clearAll } from '../lib/storage'
+import { buildAnalysis } from '../lib/analysis'
+import { clearAll, exportAll, importAll } from '../lib/storage'
 import { SUBJECTS } from '../data/levels'
 
 // 家長後台:喺主頁長按 logo 3 秒進入
@@ -9,6 +10,32 @@ export default function ParentDashboard({ go }) {
   const log = useMemo(() => getAnswerLog(), [])
   const focus = useMemo(() => getFocus(), [])
   const [confirming, setConfirming] = useState(false)
+  const [tab, setTab] = useState('overview')
+  const fileRef = useRef(null)
+
+  const doExport = () => {
+    const blob = new Blob([JSON.stringify(exportAll(), null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `星星學園備份_${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+  const doImport = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        if (importAll(JSON.parse(reader.result))) go('home', { toast: '備份已還原 ✅' })
+        else alert('檔案格式唔啱')
+      } catch {
+        alert('讀取失敗')
+      }
+    }
+    reader.readAsText(file)
+  }
 
   const now = new Date()
   const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
@@ -60,7 +87,25 @@ export default function ParentDashboard({ go }) {
         <span className="w-20" />
       </header>
 
-      {/* 答題量 */}
+      {/* 分頁切換 */}
+      <div className="mt-4 flex gap-2">
+        <button
+          onClick={() => setTab('overview')}
+          className={`kid-btn px-4 py-2 text-lg ${tab === 'overview' ? 'bg-sky-400 text-white' : 'bg-white text-sky-600'}`}
+        >
+          📚 學習總覽
+        </button>
+        <button
+          onClick={() => setTab('analysis')}
+          className={`kid-btn px-4 py-2 text-lg ${tab === 'analysis' ? 'bg-sky-400 text-white' : 'bg-white text-sky-600'}`}
+        >
+          🧠 專注力分析
+        </button>
+      </div>
+
+      {tab === 'overview' && (
+        <>
+          {/* 答題量 */}
       <section className="mt-5 grid grid-cols-2 gap-3">
         <div className="kid-card p-4 text-center">
           <p className="text-slate-500">今日答題</p>
@@ -131,12 +176,34 @@ export default function ParentDashboard({ go }) {
           </div>
         )}
       </section>
+        </>
+      )}
 
-      {/* 專注力訓練紀錄(只喺家長後台顯示,小朋友端唔會見到) */}
-      <FocusSection focus={focus} />
+      {tab === 'analysis' && (
+        <>
+          <AnalysisSection focus={focus} />
+          {/* 專注力訓練紀錄(只喺家長後台顯示,小朋友端唔會見到) */}
+          <FocusSection focus={focus} />
+        </>
+      )}
+
+      {/* 資料備份 / 匯入 */}
+      <section className="mt-8">
+        <h2 className="text-xl font-bold text-slate-700">資料備份</h2>
+        <p className="text-sm text-slate-400">所有資料只存喺呢部裝置。換機前可匯出備份,之後再匯入還原。</p>
+        <div className="mt-2 flex flex-wrap gap-3">
+          <button onClick={doExport} className="kid-btn bg-sky-100 px-5 py-2 text-lg text-sky-700">
+            ⬇️ 匯出備份
+          </button>
+          <button onClick={() => fileRef.current?.click()} className="kid-btn bg-sky-100 px-5 py-2 text-lg text-sky-700">
+            ⬆️ 匯入備份
+          </button>
+          <input ref={fileRef} type="file" accept="application/json" onChange={doImport} className="hidden" />
+        </div>
+      </section>
 
       {/* 重設進度 */}
-      <section className="mt-8">
+      <section className="mt-6">
         {confirming ? (
           <div className="kid-card border-2 border-red-300 p-4">
             <p className="font-bold text-red-600">確定要重設?所有星星、進度同紀錄都會刪除,無法復原!</p>
@@ -233,4 +300,38 @@ function FocusSection({ focus }) {
 
 function gridRank(g) {
   return { '4x4': 1, '4x5': 2 }[g] || 0
+}
+
+// 專注力分析:五大指標嘅近兩週趨勢(箭咀 + 白話解讀)
+function AnalysisSection({ focus }) {
+  const items = buildAnalysis(focus)
+  const toneCls = {
+    good: 'text-green-600',
+    bad: 'text-rose-500',
+    flat: 'text-slate-500',
+    none: 'text-slate-400',
+  }
+  return (
+    <section className="mt-5">
+      <h2 className="text-xl font-bold text-slate-700">專注力分析(近兩週趨勢)</h2>
+      <p className="text-sm text-slate-400">
+        比較最近 7 日 vs 之前 7 日。↑ 進步、→ 持平、↓ 退步、🆕 啱開始記錄。小朋友端睇唔到。
+      </p>
+      <div className="mt-2 space-y-2">
+        {items.map((it) => (
+          <div key={it.label} className="kid-card p-4">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-sky-700">{it.label}</span>
+              <span className="flex items-center gap-2">
+                <span className="text-slate-600">{it.value}</span>
+                <span className={`text-2xl font-extrabold ${toneCls[it.tone] || ''}`}>{it.arrow}</span>
+              </span>
+            </div>
+            <p className="mt-1 text-sm text-slate-600">{it.text}</p>
+            <p className="mt-0.5 text-xs text-slate-400">{it.note}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
 }
