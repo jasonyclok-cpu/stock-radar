@@ -17,6 +17,24 @@ export function getLevelPool(subject, grade, levelId) {
   return BANKS[subject].filter((q) => level.topics.includes(q.topic))
 }
 
+// 競速小遊戲用:按科目 / 課題抽題,只保留可即點作答嘅題型(四選一、選字填充)
+export function getArcadePool({ subjects, topics } = {}) {
+  const subs = subjects || ['math', 'chinese', 'english']
+  let pool = []
+  subs.forEach((s) => {
+    if (BANKS[s]) pool = pool.concat(BANKS[s])
+  })
+  if (topics) pool = pool.filter((q) => topics.includes(q.topic))
+  return pool.filter(
+    (q) => q.type === 'multiple_choice' || (q.type === 'fill_blank' && q.inputMode === 'choices'),
+  )
+}
+
+// 攞題目嘅選項(四選一用 options,選字填充用 choices)
+export function optionsOf(q) {
+  return q.type === 'multiple_choice' ? q.options : q.choices
+}
+
 // ---- 自適應難度(按科目分開記錄) ----
 // bias: -1 偏易、0 正常、+1 偏難
 export function getAdaptive(subject) {
