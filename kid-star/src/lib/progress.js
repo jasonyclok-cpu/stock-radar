@@ -45,16 +45,22 @@ export function bumpStreak() {
   return next
 }
 
-// ---- 關卡解鎖 ----
-export function getUnlocked(subject) {
-  return load('unlocked', {})[subject] || 1
+// ---- 關卡解鎖(按 科目 + 年級 分開記錄) ----
+export function getUnlocked(subject, grade) {
+  const u = load('unlocked', {})
+  const key = subject + ':' + grade
+  if (key in u) return u[key]
+  // 舊版本資料(只按科目記)相容:當作小二進度
+  if (grade === '小二' && typeof u[subject] === 'number') return u[subject]
+  return 1
 }
 
-export function unlockNext(subject, levelId, maxLevel) {
+export function unlockNext(subject, grade, levelId, maxLevel) {
   const unlocked = load('unlocked', {})
-  const current = unlocked[subject] || 1
+  const key = subject + ':' + grade
+  const current = unlocked[key] !== undefined ? unlocked[key] : getUnlocked(subject, grade)
   if (levelId === current && current < maxLevel) {
-    unlocked[subject] = current + 1
+    unlocked[key] = current + 1
     save('unlocked', unlocked)
   }
 }

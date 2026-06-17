@@ -12,7 +12,15 @@ export default function App() {
 
   switch (screen.name) {
     case 'quiz':
-      return <Quiz key={screen.nonce} subject={screen.subject} levelId={screen.levelId} go={go} />
+      return (
+        <Quiz
+          key={screen.nonce}
+          subject={screen.subject}
+          grade={screen.grade}
+          levelId={screen.levelId}
+          go={go}
+        />
+      )
     case 'memory':
       return <MemoryMatch key={screen.nonce} go={go} />
     case 'parent':

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { SUBJECTS, LEVELS } from '../data/levels'
-import { getStars, getStreak, spendStars } from '../lib/progress'
-import { getUnlocked } from '../lib/progress'
+import { SUBJECTS, LEVELS, GRADES } from '../data/levels'
+import { getStars, getStreak, spendStars, getUnlocked } from '../lib/progress'
+import { load, save } from '../lib/storage'
 import { playClick, playLevelClear } from '../lib/audio'
 import Mascot from '../components/Mascot'
 import Backdrop from '../components/Backdrop'
@@ -12,6 +12,13 @@ export default function Home({ go, toast }) {
   const stars = getStars()
   const streak = getStreak()
   const [message, setMessage] = useState(toast || '')
+  // 記住上次揀嘅年級
+  const [grade, setGrade] = useState(() => load('grade', GRADES[0].id))
+  const pickGrade = (g) => {
+    playClick()
+    setGrade(g)
+    save('grade', g)
+  }
   const pressTimer = useRef(null)
 
   useEffect(() => {
@@ -79,10 +86,28 @@ export default function Home({ go, toast }) {
         </div>
       )}
 
+      {/* 年級切換 */}
+      <div className="mt-5 flex items-center gap-3">
+        <span className="text-lg font-bold text-sky-700">年級:</span>
+        <div className="flex gap-2 rounded-full bg-white/70 p-1 shadow-inner">
+          {GRADES.map((g) => (
+            <button
+              key={g.id}
+              onClick={() => pickGrade(g.id)}
+              className={`kid-btn px-5 py-2 text-xl ${
+                grade === g.id ? 'bg-sky-400 text-white' : 'bg-transparent text-sky-600 shadow-none'
+              }`}
+            >
+              {g.emoji} {g.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* 三科關卡地圖 */}
-      <main className="mt-6 grid gap-5 md:grid-cols-3">
+      <main className="mt-4 grid gap-5 md:grid-cols-3">
         {SUBJECTS.map((s) => (
-          <SubjectCard key={s.id} subject={s} go={go} />
+          <SubjectCard key={s.id} subject={s} grade={grade} go={go} />
         ))}
       </main>
 
@@ -129,9 +154,9 @@ function GameCard({ emoji, title, desc, from, to, cost, locked, onClick }) {
   )
 }
 
-function SubjectCard({ subject, go }) {
-  const levels = LEVELS[subject.id]
-  const unlocked = getUnlocked(subject.id)
+function SubjectCard({ subject, grade, go }) {
+  const levels = LEVELS[subject.id][grade]
+  const unlocked = getUnlocked(subject.id, grade)
   const cleared = Math.min(unlocked - 1, levels.length)
   return (
     <div className="kid-card overflow-hidden">
@@ -164,7 +189,7 @@ function SubjectCard({ subject, go }) {
                   disabled={!isUnlocked}
                   onClick={() => {
                     playClick()
-                    go('quiz', { subject: subject.id, levelId: lv.id })
+                    go('quiz', { subject: subject.id, grade, levelId: lv.id })
                   }}
                   className={`kid-btn flex items-center gap-3 px-4 py-3 ${
                     isCurrent

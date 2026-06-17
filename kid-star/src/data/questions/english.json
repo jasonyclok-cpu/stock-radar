@@ -559,5 +559,203 @@
     "options": ["between", "on", "in"],
     "answer": "between",
     "explanation": "between 即係喺「兩樣嘢中間」。貓喺兩個箱中間用 between。"
+  },
+  {
+    "id": "e3-prog-001",
+    "subject": "english",
+    "topic": "現在進行式",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "She ___ a book now. (read)",
+    "options": ["is reading", "read", "reads"],
+    "answer": "is reading",
+    "explanation": "「而家正在做」用現在進行式:She / He / It + is + 動詞ing。read → is reading。"
+  },
+  {
+    "id": "e3-prog-002",
+    "subject": "english",
+    "topic": "現在進行式",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "They ___ football now. (play)",
+    "options": ["are playing", "plays", "is playing"],
+    "answer": "are playing",
+    "explanation": "They / We / You + are + 動詞ing。play → are playing。"
+  },
+  {
+    "id": "e3-prog-003",
+    "subject": "english",
+    "topic": "現在進行式",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "I ___ now. (eat)",
+    "options": ["am eating", "eat", "eating"],
+    "answer": "am eating",
+    "explanation": "I + am + 動詞ing。eat → am eating。"
+  },
+  {
+    "id": "e3-prog-004",
+    "subject": "english",
+    "topic": "現在進行式",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "He ___ a song now. (sing)",
+    "options": ["is singing", "sing", "sings"],
+    "answer": "is singing",
+    "explanation": "He + is + 動詞ing。sing → is singing。"
+  },
+  {
+    "id": "e3-prog-005",
+    "subject": "english",
+    "topic": "現在進行式",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "The dog ___ now. (run)",
+    "options": ["is running", "run", "runs"],
+    "answer": "is running",
+    "explanation": "run 結尾係短母音+n,動詞ing 要雙寫 n:run → running。配 is。"
+  },
+  {
+    "id": "e3-prog-006",
+    "subject": "english",
+    "topic": "現在進行式",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "We ___ TV now. (watch)",
+    "options": ["are watching", "watch", "watches"],
+    "answer": "are watching",
+    "explanation": "We + are + 動詞ing。watch → are watching。"
+  },
+  {
+    "id": "e3-comp-001",
+    "subject": "english",
+    "topic": "比較級",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "A giraffe is ___ than a horse. (tall)",
+    "options": ["taller", "tall", "tallest"],
+    "answer": "taller",
+    "explanation": "兩樣嘢比較,形容詞加 -er:tall → taller。後面配 than。"
+  },
+  {
+    "id": "e3-comp-002",
+    "subject": "english",
+    "topic": "比較級",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "An elephant is ___ than a cat. (big)",
+    "options": ["bigger", "big", "biggest"],
+    "answer": "bigger",
+    "explanation": "big 結尾係短母音+g,比較級要雙寫 g:big → bigger。"
+  },
+  {
+    "id": "e3-comp-003",
+    "subject": "english",
+    "topic": "比較級",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "A mouse is ___ than a dog. (small)",
+    "options": ["smaller", "small", "smallest"],
+    "answer": "smaller",
+    "explanation": "兩樣嘢比較,small → smaller,後面配 than。"
+  },
+  {
+    "id": "e3-comp-004",
+    "subject": "english",
+    "topic": "比較級",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "My bag is ___ than your bag. (heavy)",
+    "options": ["heavier", "heavy", "heavyer"],
+    "answer": "heavier",
+    "explanation": "heavy 結尾係 y,比較級把 y 變 i 再加 -er:heavy → heavier。"
+  },
+  {
+    "id": "e3-comp-005",
+    "subject": "english",
+    "topic": "比較級",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "Today is ___ than yesterday. (hot)",
+    "options": ["hotter", "hot", "hottest"],
+    "answer": "hotter",
+    "explanation": "hot 結尾係短母音+t,比較級要雙寫 t:hot → hotter。"
+  },
+  {
+    "id": "e3-comp-006",
+    "subject": "english",
+    "topic": "比較級",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "This box is ___ than that box. (big)",
+    "options": ["bigger", "big", "more big"],
+    "answer": "bigger",
+    "explanation": "短形容詞用 -er,唔用 more:big → bigger,唔係 more big。"
+  },
+  {
+    "id": "e3-wh-001",
+    "subject": "english",
+    "topic": "問句",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "___ is your name?",
+    "options": ["What", "Where", "Who"],
+    "answer": "What",
+    "explanation": "問「咩名」用 What:What is your name?"
+  },
+  {
+    "id": "e3-wh-002",
+    "subject": "english",
+    "topic": "問句",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "___ do you live?",
+    "options": ["Where", "What", "Who"],
+    "answer": "Where",
+    "explanation": "問「邊度」用 Where:Where do you live?"
+  },
+  {
+    "id": "e3-wh-003",
+    "subject": "english",
+    "topic": "問句",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "___ is that boy?",
+    "options": ["Who", "What", "Where"],
+    "answer": "Who",
+    "explanation": "問「邊個人」用 Who:Who is that boy?"
+  },
+  {
+    "id": "e3-wh-004",
+    "subject": "english",
+    "topic": "問句",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "___ colour do you like?",
+    "options": ["What", "Who", "When"],
+    "answer": "What",
+    "explanation": "問「咩顏色」用 What:What colour do you like?"
+  },
+  {
+    "id": "e3-wh-005",
+    "subject": "english",
+    "topic": "問句",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "___ is your birthday?",
+    "options": ["When", "Where", "Who"],
+    "answer": "When",
+    "explanation": "問「幾時」用 When:When is your birthday?"
+  },
+  {
+    "id": "e3-wh-006",
+    "subject": "english",
+    "topic": "問句",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "___ are you going?",
+    "options": ["Where", "Who", "What"],
+    "answer": "Where",
+    "explanation": "問「去邊度」用 Where:Where are you going?"
   }
 ]
