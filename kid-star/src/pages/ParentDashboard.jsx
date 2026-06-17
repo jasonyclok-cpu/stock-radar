@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
 import { getAnswerLog } from '../lib/progress'
+import { getFocus } from '../lib/focus'
 import { clearAll } from '../lib/storage'
 import { SUBJECTS } from '../data/levels'
 
 // 家長後台:喺主頁長按 logo 3 秒進入
 export default function ParentDashboard({ go }) {
   const log = useMemo(() => getAnswerLog(), [])
+  const focus = useMemo(() => getFocus(), [])
   const [confirming, setConfirming] = useState(false)
 
   const now = new Date()
@@ -130,6 +132,9 @@ export default function ParentDashboard({ go }) {
         )}
       </section>
 
+      {/* 專注力訓練紀錄(只喺家長後台顯示,小朋友端唔會見到) */}
+      <FocusSection focus={focus} />
+
       {/* 重設進度 */}
       <section className="mt-8">
         {confirming ? (
@@ -152,4 +157,60 @@ export default function ParentDashboard({ go }) {
       </section>
     </div>
   )
+}
+
+// 專注力訓練統計:完成時間、反應時間、誤點等(供家長分析,小朋友端從不顯示)
+function FocusSection({ focus }) {
+  const schulte = focus.schulte || []
+  const reaction = focus.reaction || []
+  const memory = focus.memory || []
+
+  const bestBySize = {}
+  schulte.forEach((r) => {
+    if (!bestBySize[r.size] || r.ms < bestBySize[r.size]) bestBySize[r.size] = r.ms
+  })
+  const lastReaction = reaction[reaction.length - 1]
+  const bestMemoryGrid = memory.reduce((b, r) => (gridRank(r.grid) > gridRank(b) ? r.grid : b), '—')
+
+  const fmt = (ms) => (ms == null ? '—' : (ms / 1000).toFixed(1) + ' 秒')
+
+  const empty = !schulte.length && !reaction.length && !memory.length
+
+  return (
+    <section className="mt-5">
+      <h2 className="text-xl font-bold text-slate-700">專注力訓練紀錄</h2>
+      <p className="text-sm text-slate-400">小朋友端只當闖關遊戲,以下數據只供你參考。</p>
+      {empty ? (
+        <p className="mt-2 text-slate-500">仲未有紀錄,玩過專注力遊戲就會出現。</p>
+      ) : (
+        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <div className="kid-card p-4">
+            <p className="font-bold text-sky-700">🔢 數字快搜(最快完成)</p>
+            <p className="mt-1 text-sm text-slate-600">3×3:{fmt(bestBySize[3])}</p>
+            <p className="text-sm text-slate-600">4×4:{fmt(bestBySize[4])}</p>
+            <p className="text-sm text-slate-600">5×5:{fmt(bestBySize[5])}</p>
+            <p className="mt-1 text-xs text-slate-400">共玩 {schulte.length} 次</p>
+          </div>
+          <div className="kid-card p-4">
+            <p className="font-bold text-sky-700">🚦 紅綠燈(最近一次)</p>
+            <p className="mt-1 text-sm text-slate-600">
+              平均反應:{lastReaction && lastReaction.avgMs != null ? lastReaction.avgMs + ' 毫秒' : '—'}
+            </p>
+            <p className="text-sm text-slate-600">綠燈成功:{lastReaction ? lastReaction.hits : '—'} 次</p>
+            <p className="text-sm text-slate-600">紅燈誤點:{lastReaction ? lastReaction.falseTaps : '—'} 次</p>
+            <p className="mt-1 text-xs text-slate-400">共玩 {reaction.length} 次</p>
+          </div>
+          <div className="kid-card p-4">
+            <p className="font-bold text-sky-700">🧠 記憶翻牌</p>
+            <p className="mt-1 text-sm text-slate-600">最大完成格數:{bestMemoryGrid}</p>
+            <p className="mt-1 text-xs text-slate-400">共玩 {memory.length} 次</p>
+          </div>
+        </div>
+      )}
+    </section>
+  )
+}
+
+function gridRank(g) {
+  return { '4x4': 1, '4x5': 2 }[g] || 0
 }
