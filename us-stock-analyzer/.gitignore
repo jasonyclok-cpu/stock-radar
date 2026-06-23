@@ -1,0 +1,10 @@
+# 使用者資料(模擬倉、watchlist)
+data/
+
+# 機密(API key、用戶密碼)
+.streamlit/secrets.toml
+
+# 虛擬環境同快取
+.venv/
+__pycache__/
+*.pyc
