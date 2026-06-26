@@ -11,7 +11,7 @@ import { playPop, playWrong, playLevelClear } from '../lib/audio'
 const ROUND_MS = 60000
 
 export default function TrafficLight({ go }) {
-  const [phase, setPhase] = useState('ready') // ready | green | red
+  const [phase, setPhase] = useState('ready') // ready | yellow | green | red
   const [hint, setHint] = useState('預備…')
   const [timeFrac, setTimeFrac] = useState(1)
   const [over, setOver] = useState(false)
@@ -22,7 +22,7 @@ export default function TrafficLight({ go }) {
   const falseRef = useRef(0)
   const timers = useRef([])
   const startRef = useRef(0)
-  const speedRef = useRef(2200) // 等待上限,表現好會縮短(加速)
+  const speedRef = useRef(1200) // 等待上限,表現好會縮短(加速);已調快
 
   const setP = (p) => {
     phaseRef.current = p
@@ -41,16 +41,23 @@ export default function TrafficLight({ go }) {
   const schedule = () => {
     setP('ready')
     setHint('預備…')
-    const wait = 700 + Math.random() * speedRef.current
+    const wait = 350 + Math.random() * speedRef.current // 調快咗
     addTimer(() => {
-      if (Math.random() < 0.78) {
-        greenAtRef.current = performance.now()
-        setP('green')
-        setHint('撳!')
-      } else {
+      if (Math.random() < 0.25) {
+        // 紅燈:唔好撳
         setP('red')
-        setHint('停!✋')
-        addTimer(() => schedule(), 1000) // 紅燈過咗自動繼續
+        setHint('🔴 停!唔好撳')
+        addTimer(() => schedule(), 700)
+      } else {
+        // 先黃燈準備,再轉綠燈(教小朋友等綠燈先撳)
+        setP('yellow')
+        setHint('🟡 準備…')
+        const yellowDur = 300 + Math.random() * 450
+        addTimer(() => {
+          greenAtRef.current = performance.now()
+          setP('green')
+          setHint('🟢 撳!')
+        }, yellowDur)
       }
     }, wait)
   }
@@ -102,15 +109,19 @@ export default function TrafficLight({ go }) {
       const rt = performance.now() - greenAtRef.current
       rtsRef.current.push(rt)
       playPop()
-      setHint(rt < 500 ? '⚡ 好快!' : '叻!')
-      // 表現好就加速(等待上限收窄)
-      if (rt < 600) speedRef.current = Math.max(1100, speedRef.current - 120)
+      setHint(rt < 450 ? '⚡ 好快!' : '叻!')
+      // 表現好就加速(等待上限再收窄)
+      if (rt < 500) speedRef.current = Math.max(500, speedRef.current - 120)
       clearTimers()
-      addTimer(() => schedule(), 500)
+      addTimer(() => schedule(), 350)
     } else if (p === 'red') {
       falseRef.current += 1
       playWrong() // 誤點唔扣分,只搖晃提示
-      setHint('紅燈唔好撳呀!')
+      setHint('🔴 紅燈唔好撳呀!')
+    } else if (p === 'yellow') {
+      falseRef.current += 1
+      playWrong() // 黃燈太早撳,要等綠燈
+      setHint('🟡 等綠燈先至撳!')
     } else {
       setHint('等綠燈先!')
     }
@@ -139,7 +150,13 @@ export default function TrafficLight({ go }) {
   }
 
   const bg =
-    phase === 'green' ? 'bg-green-400' : phase === 'red' ? 'bg-rose-500' : 'bg-slate-300'
+    phase === 'green'
+      ? 'bg-green-400'
+      : phase === 'red'
+        ? 'bg-rose-500'
+        : phase === 'yellow'
+          ? 'bg-amber-400'
+          : 'bg-slate-300'
 
   return (
     <div className="mx-auto flex min-h-screen max-w-xl flex-col px-4 pb-6 pt-4">
@@ -164,12 +181,14 @@ export default function TrafficLight({ go }) {
         }`}
       >
         <span className="text-[96px] leading-none">
-          {phase === 'green' ? '🟢' : phase === 'red' ? '🔴' : '⚪'}
+          {phase === 'green' ? '🟢' : phase === 'red' ? '🔴' : phase === 'yellow' ? '🟡' : '⚪'}
         </span>
         <span className="mt-4 text-4xl font-extrabold drop-shadow">{hint}</span>
       </button>
 
-      <p className="mt-3 text-center text-lg text-sky-700">綠燈 🟢 就快啲撳,紅燈 🔴 唔好撳!</p>
+      <p className="mt-3 text-center text-lg text-sky-700">
+        只有綠燈 🟢 先至撳!黃燈 🟡 準備、紅燈 🔴 停,都唔好撳!
+      </p>
     </div>
   )
 }
