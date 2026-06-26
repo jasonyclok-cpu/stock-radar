@@ -13,7 +13,27 @@ const SECONDS = 60
 // config: { subjects?, topics?, title };  reward: 係咪免費版會賺星
 export default function ArcadeQuiz({ go, config = {}, reward = false }) {
   const pool = useMemo(() => getArcadePool(config), [])
-  const [q, setQ] = useState(() => pickQ(pool, null))
+  // 洗牌袋:整個題庫洗勻後逐條派,派晒先再洗 → 未出晒全部都唔會重複
+  const bagRef = useRef([])
+  const lastRef = useRef(null)
+  const draw = () => {
+    if (!pool.length) return null
+    if (bagRef.current.length === 0) {
+      const bag = shuffle(pool)
+      // 接縫位:新一袋第一條若同上一條一樣,同第二條對調,避免感覺重複
+      if (lastRef.current && bag.length > 1 && bag[0].id === lastRef.current) {
+        const t = bag[0]
+        bag[0] = bag[1]
+        bag[1] = t
+      }
+      bagRef.current = bag
+    }
+    const nq = bagRef.current.shift()
+    lastRef.current = nq.id
+    return nq
+  }
+
+  const [q, setQ] = useState(() => draw())
   const [opts, setOpts] = useState(() => (q ? shuffle(optionsOf(q)) : []))
   const [score, setScore] = useState(0)
   const [flash, setFlash] = useState(null)
@@ -40,9 +60,9 @@ export default function ArcadeQuiz({ go, config = {}, reward = false }) {
   }, [over])
 
   function next() {
-    const nq = pickQ(pool, q && q.id)
+    const nq = draw()
     setQ(nq)
-    setOpts(shuffle(optionsOf(nq)))
+    setOpts(nq ? shuffle(optionsOf(nq)) : [])
     lockRef.current = false
   }
 
@@ -146,10 +166,4 @@ export default function ArcadeQuiz({ go, config = {}, reward = false }) {
       </div>
     </div>
   )
-}
-
-function pickQ(pool, avoidId) {
-  if (!pool.length) return null
-  const cand = pool.length > 1 && avoidId ? pool.filter((q) => q.id !== avoidId) : pool
-  return cand[Math.floor(Math.random() * cand.length)]
 }
