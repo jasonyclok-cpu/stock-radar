@@ -153,7 +153,52 @@ export default function Home({ go, toast }) {
         stars={stars}
         onPlay={playGame}
       />
+
+      {/* 獨立學習模組(各自一個 PWA,連去自己嘅資料夾) */}
+      <section className="mt-8">
+        <h2 className="title-pop text-3xl">🎒 學習小天地</h2>
+        <p className="mt-1 text-lg font-bold text-sky-700">仲有更多好玩學習,一齊儲車仔!🚗</p>
+        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+          <ExternalCard
+            emoji="🛒"
+            title="升呢小老闆"
+            desc="買買賣賣學數學,收銀、找贖、採購!"
+            from="from-rose-400"
+            to="to-pink-500"
+            href={`${import.meta.env.BASE_URL}shop/`}
+          />
+          <ExternalCard
+            emoji="📖"
+            title="閱讀小天地"
+            desc="中英分級閱讀,有朗讀同生字解釋!"
+            from="from-emerald-400"
+            to="to-teal-500"
+            href={`${import.meta.env.BASE_URL}reading/`}
+          />
+        </div>
+      </section>
     </div>
+  )
+}
+
+// 連去獨立模組(整頁跳轉);沿用 GameCard 一致風格
+function ExternalCard({ emoji, title, desc, from, to, href }) {
+  return (
+    <a
+      href={href}
+      className={`candy-btn flex items-center gap-4 bg-gradient-to-br ${from} ${to} p-5 text-left`}
+    >
+      <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/30 text-4xl">
+        {emoji}
+      </span>
+      <span>
+        <span className="block text-2xl font-extrabold text-white drop-shadow">{title}</span>
+        <span className="block text-base text-white/90">{desc}</span>
+      </span>
+      <span className="ml-auto shrink-0 rounded-full bg-white/90 px-3 py-1 text-lg font-extrabold text-amber-600">
+        GO →
+      </span>
+    </a>
   )
 }
 

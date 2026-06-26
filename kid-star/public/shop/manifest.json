@@ -1,0 +1,20 @@
+{
+  "name": "升呢小老闆",
+  "short_name": "小老闆",
+  "description": "香港小學數學買賣遊戲：加減乘、進位退位、收銀找贖、採購預算。",
+  "lang": "zh-HK",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF6E9",
+  "theme_color": "#FF8FA3",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
