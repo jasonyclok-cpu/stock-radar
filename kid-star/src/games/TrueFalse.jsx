@@ -32,11 +32,25 @@ function makeQ() {
     const off = (Math.random() < 0.5 ? 1 : -1) * (1 + Math.floor(Math.random() * 3))
     shown = real + off
   }
-  return { text: `${a} ${op} ${b} = ${shown}`, correct: shown === real }
+  return { text: `${a} ${op} ${b} = ${shown}`, correct: shown === real, sig: `${a}${op}${b}` }
 }
 
 export default function TrueFalse({ go }) {
-  const [q, setQ] = useState(makeQ)
+  // 記住最近用過嘅算式(同 operand 組合),撳到就重新生成,避免重複/太似
+  const recentRef = useRef([])
+  const freshQ = () => {
+    let q
+    let guard = 0
+    do {
+      q = makeQ()
+      guard += 1
+    } while (recentRef.current.includes(q.sig) && guard < 30)
+    recentRef.current.push(q.sig)
+    if (recentRef.current.length > 16) recentRef.current.shift()
+    return q
+  }
+
+  const [q, setQ] = useState(freshQ)
   const [score, setScore] = useState(0)
   const [flash, setFlash] = useState(null)
   const [cheer, setCheer] = useState('')
@@ -85,7 +99,7 @@ export default function TrueFalse({ go }) {
     }
     setTimeout(() => {
       setFlash(null)
-      setQ(makeQ())
+      setQ(freshQ())
       lockRef.current = false
     }, 450)
   }

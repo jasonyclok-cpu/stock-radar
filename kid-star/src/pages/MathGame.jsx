@@ -76,7 +76,21 @@ function makeQuestion() {
 
 // 限時心算:60 秒內答得越多越叻,答啱攞分,終結按分數賺星星
 export default function MathGame({ go }) {
-  const [q, setQ] = useState(makeQuestion)
+  // 記住最近出過嘅題,撞到就重新生成(避免重複或太似)
+  const recentRef = useRef([])
+  const freshQuestion = () => {
+    let q
+    let guard = 0
+    do {
+      q = makeQuestion()
+      guard += 1
+    } while (recentRef.current.includes(q.prompt) && guard < 30)
+    recentRef.current.push(q.prompt)
+    if (recentRef.current.length > 16) recentRef.current.shift()
+    return q
+  }
+
+  const [q, setQ] = useState(freshQuestion)
   const [value, setValue] = useState('')
   const [score, setScore] = useState(0)
   const [timeLeft, setTimeLeft] = useState(GAME_SECONDS)
@@ -127,7 +141,7 @@ export default function MathGame({ go }) {
       }
       setValue('')
       setTimeout(() => setFlash(null), 350)
-      setQ(makeQuestion())
+      setQ(freshQuestion())
     } else if (value.length < 4) {
       setValue((v) => v + k)
     }
