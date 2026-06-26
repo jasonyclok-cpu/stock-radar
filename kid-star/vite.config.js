@@ -32,6 +32,11 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,svg,ico,woff2}'],
+        // 唔好 precache 兩個獨立模組(佢哋有自己嘅 service worker)
+        globIgnores: ['shop/**', 'reading/**'],
+        // /shop/ 同 /reading/ 唔行 kid-star 嘅 SPA 導航回退,
+        // 交返畀佢哋各自嘅 service worker 處理,避免搶 scope
+        navigateFallbackDenylist: [/\/shop\//, /\/reading\//],
       },
     }),
   ],

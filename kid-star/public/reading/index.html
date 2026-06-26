@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<!--
+  kid-star ・ reading 模組｜閱讀小天地 (Reading)
+  中文（繁體・書面語）＋ English 閱讀理解：分級短文、朗讀（瀏覽器內置語音）、生字解釋、升 LV、存檔。
+  內容在 passages.js（window.READING_DATA），可自行擴充。
+  單檔引擎、零外部依賴；存檔 localStorage key: readingSave_v1。
+  部署：放於 kid-star/reading/，配 manifest.json + sw.js + icon.svg（同一資料夾）。
+-->
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#4D96FF">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="閱讀小天地">
+<title>閱讀小天地 📖</title>
+<style>
+  :root{
+    --cream:#F3F7FF; --sky:#E3EEFF; --coral:#FF6B6B; --green:#3FC56B;
+    --yellow:#FFC93C; --blue:#4D96FF; --ink:#33415C; --ink-soft:#7B89A3; --white:#fff;
+    --shadow:0 6px 0 rgba(0,0,0,.10);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; height:100%;}
+  body{font-family:"PingFang HK","Heiti TC","Microsoft JhengHei",-apple-system,system-ui,sans-serif;
+    background:linear-gradient(165deg,var(--cream),var(--sky)); color:var(--ink);
+    overflow:hidden; user-select:none; display:flex; flex-direction:column; height:100dvh;}
+  .wrap{max-width:560px; margin:0 auto; width:100%; height:100%; display:flex; flex-direction:column; padding:12px; gap:12px;}
+
+  .hud{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .title{font-size:19px; font-weight:900;}
+  .chips{margin-left:auto; display:flex; gap:7px; align-items:center;}
+  .chip{background:var(--white); border-radius:18px; padding:6px 11px; font-weight:900;
+    box-shadow:0 3px 0 rgba(0,0,0,.08); font-size:14px;}
+  .lv-chip{background:var(--blue); color:#fff;}
+  .reset{background:#fff; border:none; border-radius:18px; padding:6px 10px; font-size:16px; font-weight:900;
+    box-shadow:0 3px 0 rgba(0,0,0,.08); cursor:pointer; color:var(--ink-soft);}
+  .reset:active{transform:translateY(2px);}
+  .bar-wrap{height:14px; background:#fff; border-radius:20px; overflow:hidden; box-shadow:inset 0 2px 4px rgba(0,0,0,.10);}
+  .bar{height:100%; width:0%; background:linear-gradient(90deg,var(--yellow),var(--green)); border-radius:20px; transition:width .4s;}
+
+  .langs{display:flex; gap:8px;}
+  .lang-btn{flex:1; border:none; border-radius:18px; padding:10px 6px; font-weight:900; font-size:15px;
+    background:#fff; color:var(--ink-soft); box-shadow:0 4px 0 rgba(0,0,0,.08); cursor:pointer;}
+  .lang-btn.active{background:var(--blue); color:#fff;}
+  .lang-btn:active{transform:translateY(2px);}
+
+  .stage{flex:1; background:var(--white); border-radius:24px; padding:16px; box-shadow:var(--shadow);
+    display:flex; flex-direction:column; min-height:0; overflow:auto;}
+
+  .p-emoji{font-size:54px; text-align:center; line-height:1;}
+  .p-title{text-align:center; font-weight:900; font-size:18px; margin:4px 0 10px;}
+  .speak-all{display:block; margin:0 auto 12px; border:none; border-radius:16px; padding:9px 18px;
+    font-weight:900; font-size:15px; background:var(--yellow); color:var(--ink); box-shadow:0 4px 0 rgba(0,0,0,.12); cursor:pointer;}
+  .speak-all:active{transform:translateY(2px); box-shadow:0 2px 0 rgba(0,0,0,.12);}
+  .sentences{font-size:20px; line-height:2; font-weight:700;}
+  .sent{cursor:pointer; padding:1px 4px; border-radius:8px;}
+  .sent:active{background:var(--sky);}
+  .sent .spk{font-size:14px; opacity:.5;}
+  .gloss-label{margin-top:14px; font-weight:900; color:var(--ink-soft); font-size:14px;}
+  .gloss-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;}
+  .gloss-chip{border:none; border-radius:14px; padding:8px 12px; font-weight:800; font-size:15px;
+    background:var(--sky); color:var(--blue); box-shadow:0 3px 0 rgba(0,0,0,.08); cursor:pointer;}
+  .gloss-chip:active{transform:translateY(2px);}
+  .go-quiz{margin-top:auto; border:none; border-radius:20px; padding:15px; font-size:19px; font-weight:900; width:100%;
+    background:var(--green); color:#fff; box-shadow:0 6px 0 #2fa257; cursor:pointer;}
+  .go-quiz:active{transform:translateY(3px); box-shadow:0 3px 0 #2fa257;}
+
+  .q-count{text-align:center; font-weight:900; color:var(--ink-soft); margin-bottom:8px;}
+  .q-text{font-size:20px; font-weight:800; text-align:center; line-height:1.5; margin:10px 0 16px;}
+  .choices{display:flex; flex-direction:column; gap:10px;}
+  .ans{border:none; border-radius:18px; padding:16px; font-size:18px; font-weight:900; text-align:center;
+    background:var(--yellow); color:var(--ink); box-shadow:0 5px 0 rgba(0,0,0,.13); cursor:pointer;}
+  .ans:active{transform:translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.13);}
+  .ans.ok{background:var(--green); color:#fff;}
+  .ans.no{background:#FF9AA2;}
+  .ans:disabled{opacity:.6;}
+  .feedback{text-align:center; font-weight:900; font-size:18px; min-height:24px; margin-top:12px;}
+  .feedback.good{color:var(--green);} .feedback.bad{color:var(--coral);}
+
+  .overlay{position:fixed; inset:0; background:rgba(40,55,80,.55); backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center; z-index:20; padding:20px;}
+  .card{background:#fff; border-radius:28px; padding:26px 22px; text-align:center; max-width:380px; width:100%;
+    box-shadow:0 12px 0 rgba(0,0,0,.15);}
+  .card h1{font-size:28px; margin:6px 0;} .card p{font-size:16px; color:var(--ink-soft); font-weight:700; line-height:1.6;}
+  .big-emoji{font-size:68px;}
+  .play-btn{border:none; border-radius:20px; padding:14px 28px; font-size:20px; font-weight:900; width:100%;
+    background:var(--blue); color:#fff; box-shadow:0 6px 0 #3a78d0; cursor:pointer; margin-top:10px;}
+  .play-btn:active{transform:translateY(3px); box-shadow:0 3px 0 #3a78d0;}
+  .play-btn.secondary{background:#E7ECF5; color:var(--ink-soft); box-shadow:0 5px 0 #cfd8e6; font-size:16px;}
+  .gloss-pop .term{font-size:30px; font-weight:900; margin:6px 0;}
+  .gloss-pop .mean{font-size:20px; font-weight:700;}
+  .hidden{display:none !important;}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hud">
+    <div class="title">📖 閱讀小天地</div>
+    <div class="chips">
+      <div class="chip lv-chip">LV <span id="lv">1</span></div>
+      <div class="chip">⭐ <span id="stars">0</span></div>
+      <button class="reset" id="resetBtn">↺</button>
+    </div>
+  </div>
+  <div class="bar-wrap"><div class="bar" id="bar"></div></div>
+  <div class="langs">
+    <button class="lang-btn active" id="langZh">中文</button>
+    <button class="lang-btn" id="langEn">English</button>
+  </div>
+
+  <div class="stage" id="stage"></div>
+</div>
+
+<div class="overlay" id="startScreen">
+  <div class="card">
+    <div class="big-emoji">📖</div>
+    <h1>閱讀小天地</h1>
+    <p>讀短文、聽朗讀、學生字，再答問題！<br>中文同英文都有，越讀越叻 🌟</p>
+    <div id="startBtns"></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="doneScreen">
+  <div class="card">
+    <div class="big-emoji" id="doneEmoji">🎉</div>
+    <h1 id="doneTitle">做得好！</h1>
+    <p id="doneText"></p>
+    <button class="play-btn" id="doneBtn">繼續 ▶</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="glossPop">
+  <div class="card gloss-pop">
+    <div class="big-emoji">📖</div>
+    <div class="term" id="glossTerm"></div>
+    <div class="mean" id="glossMean"></div>
+    <button class="play-btn" id="glossSpeak">🔊 再聽一次</button>
+    <button class="play-btn secondary" id="glossClose">明白喇</button>
+  </div>
+</div>
+
+<script src="./passages.js"></script>
+<script src="./cars.js"></script>
+<script src="./garage.js"></script>
+<script>
+(function(){
+  "use strict";
+  const KEY="readingSave_v1";
+  const DATA = window.READING_DATA || [];
+  const $ = id => document.getElementById(id);
+  const rnd = n => Math.floor(Math.random()*n);
+  const pick = arr => arr[rnd(arr.length)];
+  const NEED = 2;                          // 完成幾多篇升一級
+  const maxLevel = lang => DATA.filter(p=>p.lang===lang).reduce((m,p)=>Math.max(m,p.level),1);
+
+  let S;
+  function defaults(){ return { lang:"zh", lvZh:1, lvEn:1, stars:0, doneZh:0, doneEn:0, seen:[] }; }
+  function curLv(){ return S.lang==="zh"?S.lvZh:S.lvEn; }
+  function setCurLv(v){ if(S.lang==="zh") S.lvZh=v; else S.lvEn=v; }
+  function curDone(){ return S.lang==="zh"?S.doneZh:S.doneEn; }
+  function addDone(){ if(S.lang==="zh") S.doneZh++; else S.doneEn++; }
+  function resetDone(){ if(S.lang==="zh") S.doneZh=0; else S.doneEn=0; }
+
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+  function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } }
+  function clearSave(){ try{ localStorage.removeItem(KEY); }catch(e){} }
+
+  // ---- 朗讀（瀏覽器內置語音）----
+  function speak(text){
+    try{
+      if(!('speechSynthesis' in window)) return;
+      speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(text);
+      u.lang = S.lang==="zh" ? "zh-HK" : "en-US";
+      u.rate = 0.9;
+      const vs = speechSynthesis.getVoices()||[];
+      const want = S.lang==="zh" ? ["zh-hk","zh-tw","zh"] : ["en-us","en-gb","en"];
+      let v=null;
+      for(const w of want){ v = vs.find(x=>x.lang && x.lang.toLowerCase().startsWith(w)); if(v) break; }
+      if(v) u.voice=v;
+      speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  // ---- 選文 ----
+  let cur=null, qi=0, correctCnt=0, tries=0;
+  function nextPassage(){
+    const lang=S.lang, lv=curLv();
+    let pool = DATA.filter(p=>p.lang===lang && p.level<=lv);
+    let fresh = pool.filter(p=>!S.seen.includes(p.id));
+    if(fresh.length===0){ S.seen=S.seen.filter(id=>!pool.some(p=>p.id===id)); fresh=pool; }
+    // 優先當前等級
+    const atLv = fresh.filter(p=>p.level===lv);
+    cur = pick(atLv.length?atLv:fresh);
+    S.seen.push(cur.id); if(S.seen.length>20) S.seen.shift();
+    qi=0; correctCnt=0; tries=0;
+    renderRead();
+  }
+
+  function renderRead(){
+    const p=cur;
+    let h = `<div class="p-emoji">${p.emoji}</div><div class="p-title">${p.title}</div>`;
+    h += `<button class="speak-all" id="speakAll">🔊 讀全文</button>`;
+    h += `<div class="sentences">`;
+    p.text.forEach((s,i)=> h += `<span class="sent" data-i="${i}">${s}<span class="spk"> 🔊</span></span> `);
+    h += `</div>`;
+    const gk = Object.keys(p.glossary||{});
+    if(gk.length){
+      h += `<div class="gloss-label">生字 📖（撳一下睇意思）</div><div class="gloss-row">`;
+      gk.forEach(w=> h += `<button class="gloss-chip" data-w="${w}">${w}</button>`);
+      h += `</div>`;
+    }
+    h += `<button class="go-quiz" id="goQuiz">我讀完喇，答問題 ▶</button>`;
+    const st=$("stage"); st.innerHTML=h; st.scrollTop=0;
+    $("speakAll").onclick=()=>speak(p.text.join(" "));
+    st.querySelectorAll(".sent").forEach(el=> el.onclick=()=>speak(p.text[+el.dataset.i]));
+    st.querySelectorAll(".gloss-chip").forEach(el=> el.onclick=()=>showGloss(el.dataset.w, p.glossary[el.dataset.w]));
+    $("goQuiz").onclick=renderQuiz;
+    updateHud();
+  }
+
+  function showGloss(term, mean){
+    $("glossTerm").textContent=term; $("glossMean").textContent=mean;
+    $("glossPop").classList.remove("hidden");
+    speak(term);
+    $("glossSpeak").onclick=()=>speak(term);
+  }
+  $("glossClose").onclick=()=>$("glossPop").classList.add("hidden");
+
+  function renderQuiz(){
+    const p=cur, q=p.questions[qi];
+    const choices = q.type==="tf"
+      ? (S.lang==="zh"?["啱 ✓","唔啱 ✗"]:["True ✓","False ✗"])
+      : q.choices;
+    const correctIdx = q.type==="tf" ? (q.answer?0:1) : q.answer;
+    let h = `<div class="q-count">問題 ${qi+1} / ${p.questions.length}</div>`;
+    h += `<div class="p-emoji" style="font-size:40px">${p.emoji}</div>`;
+    h += `<button class="speak-all" id="qSpeak">🔊 讀問題</button>`;
+    h += `<div class="q-text">${q.q}</div><div class="choices" id="choices"></div>`;
+    h += `<div class="feedback" id="fb"></div>`;
+    const st=$("stage"); st.innerHTML=h; st.scrollTop=0;
+    $("qSpeak").onclick=()=>speak(q.q);
+    const cEl=$("choices");
+    choices.forEach((c,idx)=>{ const b=document.createElement("button"); b.className="ans"; b.textContent=c;
+      b.onclick=()=>answer(b, idx===correctIdx); cEl.appendChild(b); });
+    tries=0;
+  }
+
+  function answer(btn, correct){
+    if(correct){
+      btn.classList.add("ok"); [...$("choices").children].forEach(b=>b.disabled=true);
+      if(tries===0){ S.stars+=1; correctCnt++; }
+      const fb=$("fb"); fb.className="feedback good"; fb.textContent = tries===0?"啱晒！⭐ +1":"啱喇！";
+      save(); updateHud();
+      try{ if(window.Garage) Garage.drop('small'); }catch(e){}
+      setTimeout(()=>{ qi++; if(qi<cur.questions.length) renderQuiz(); else finishPassage(); }, 850);
+    } else {
+      tries++; btn.classList.add("no"); btn.disabled=true;
+      const fb=$("fb"); fb.className="feedback bad"; fb.textContent="再諗多次，可以撳 🔊 聽返 😊";
+      setTimeout(()=>btn.classList.remove("no"),400);
+    }
+  }
+
+  function finishPassage(){
+    addDone();
+    const total=cur.questions.length;
+    let leveled=false;
+    if(curDone()>=NEED && curLv()<maxLevel(S.lang)){ setCurLv(curLv()+1); resetDone(); leveled=true; }
+    save();
+    $("doneEmoji").textContent = leveled?"🏆":"🎉";
+    $("doneTitle").textContent = leveled?"升級喇！":"完成一篇！";
+    $("doneText").innerHTML = leveled
+      ? `你嘅${S.lang==="zh"?"中文":"英文"}閱讀升到 LV ${curLv()}！<br>會有長少少、深少少嘅文章，加油 💪`
+      : `呢篇答啱咗 ${correctCnt} / ${total} 題。<br>繼續讀下一篇啦 🌟`;
+    $("doneScreen").classList.remove("hidden");
+    updateHud();
+    try{ if(window.Garage) Garage.drop(leveled?'big':'medium'); }catch(e){}
+  }
+  $("doneBtn").onclick=()=>{ $("doneScreen").classList.add("hidden"); nextPassage(); };
+
+  function updateHud(){
+    $("lv").textContent=curLv(); $("stars").textContent=S.stars;
+    $("bar").style.width = Math.min(100, (curDone()/NEED)*100) + "%";
+  }
+
+  function setLang(l){
+    S.lang=l; $("langZh").classList.toggle("active",l==="zh"); $("langEn").classList.toggle("active",l==="en");
+    save(); nextPassage();
+  }
+  $("langZh").onclick=()=>setLang("zh");
+  $("langEn").onclick=()=>setLang("en");
+  $("resetBtn").onclick=()=>{ save(); buildStart(); $("startScreen").classList.remove("hidden"); };
+
+  function setLangUI(l){ $("langZh").classList.toggle("active",l==="zh"); $("langEn").classList.toggle("active",l==="en"); }
+  function buildStart(){
+    const sv=load(), box=$("startBtns"); box.innerHTML="";
+    if(sv && (sv.lvZh||sv.lvEn)){
+      const c=document.createElement("button"); c.className="play-btn";
+      c.textContent=`繼續（中文 LV ${sv.lvZh||1}・英文 LV ${sv.lvEn||1}）▶`;
+      c.onclick=()=>{ S=Object.assign(defaults(), sv); if(!Array.isArray(S.seen)) S.seen=[];
+        setLangUI(S.lang); $("startScreen").classList.add("hidden"); nextPassage(); };
+      box.appendChild(c);
+      const f=document.createElement("button"); f.className="play-btn secondary"; f.textContent="由頭開始"; f.onclick=startFresh; box.appendChild(f);
+    } else {
+      const g=document.createElement("button"); g.className="play-btn"; g.textContent="開始閱讀 ▶"; g.onclick=startFresh; box.appendChild(g);
+    }
+  }
+  function startFresh(){ S=defaults(); clearSave(); setLangUI("zh"); $("startScreen").classList.add("hidden"); nextPassage(); }
+
+  // 預載語音清單（部分瀏覽器要先觸發）
+  if('speechSynthesis' in window){ speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices(); }
+
+  S=defaults();
+  if(!DATA.length){ $("stage").innerHTML='<p style="padding:20px;text-align:center;font-weight:800">未載入到題庫 passages.js 😅</p>'; }
+  else buildStart();
+})();
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){ navigator.serviceWorker.register('./sw.js').catch(function(){}); });
+}
+</script>
+</body>
+</html>

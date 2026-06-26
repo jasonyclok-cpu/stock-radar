@@ -1,0 +1,20 @@
+{
+  "name": "閱讀小天地",
+  "short_name": "閱讀",
+  "description": "中文（繁體）與英文分級閱讀理解：短文、朗讀、生字解釋。",
+  "lang": "zh-HK",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F3F7FF",
+  "theme_color": "#4D96FF",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

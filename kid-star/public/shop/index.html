@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<!--
+  kid-star ・ shop 模組｜升呢小老闆 (Shop Tycoon)
+  香港小學數學買賣遊戲：加／減（進位退位）、乘數、收銀找贖（真・填直式 + 借位提示）、採購預算。
+  單檔、零外部依賴；存檔用 localStorage（key: shopTycoonSave_v1）。
+  部署：放於 kid-star/shop/index.html，配 manifest.json + sw.js（同一資料夾）。
+-->
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#FF8FA3">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="升呢小老闆">
+<title>升呢小老闆 🛒</title>
+<style>
+  :root{
+    --cream:#FFF6E9; --pink:#FFE5EE; --coral:#FF6B6B; --green:#3FC56B;
+    --yellow:#FFC93C; --blue:#4D96FF; --wood:#D9A066; --wood-dark:#B97F4A;
+    --ink:#5A4632; --ink-soft:#8C7A66; --white:#fff; --shadow:0 6px 0 rgba(0,0,0,.12);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; height:100%;}
+  body{font-family:"PingFang HK","Heiti TC","Microsoft JhengHei",-apple-system,system-ui,sans-serif;
+    background:linear-gradient(165deg,var(--cream) 0%,var(--pink) 100%);
+    color:var(--ink); overflow:hidden; user-select:none; display:flex; flex-direction:column; height:100dvh;}
+  .wrap{max-width:520px; margin:0 auto; width:100%; height:100%; display:flex; flex-direction:column; padding:12px; gap:12px;}
+
+  .hud{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .shop-name{font-size:19px; font-weight:900; letter-spacing:1px;}
+  .shop-name .emoji{font-size:23px;}
+  .chips{margin-left:auto; display:flex; gap:7px;}
+  .chip{background:var(--white); border-radius:18px; padding:6px 11px; font-weight:900;
+    box-shadow:0 3px 0 rgba(0,0,0,.10); display:flex; align-items:center; gap:4px; font-size:14px;}
+  .lv-chip{background:var(--blue); color:#fff;}
+  .reset{background:#fff; border:none; border-radius:18px; padding:6px 10px; font-size:16px; font-weight:900;
+    box-shadow:0 3px 0 rgba(0,0,0,.10); cursor:pointer; color:var(--ink-soft);}
+  .reset:active{transform:translateY(2px);}
+  .bar-wrap{height:16px; background:#fff; border-radius:20px; overflow:hidden; box-shadow:inset 0 2px 4px rgba(0,0,0,.12);}
+  .bar{height:100%; width:0%; background:linear-gradient(90deg,var(--yellow),var(--green));
+       border-radius:20px; transition:width .45s cubic-bezier(.34,1.56,.64,1);}
+
+  .roles{display:flex; gap:8px;}
+  .role-btn{flex:1; border:none; border-radius:18px; padding:10px 6px; font-weight:900; font-size:15px;
+    background:#fff; color:var(--ink-soft); box-shadow:0 4px 0 rgba(0,0,0,.10); cursor:pointer; transition:transform .1s;}
+  .role-btn.active{background:var(--coral); color:#fff;}
+  .role-btn:active{transform:translateY(2px);}
+
+  .stage{flex:1; background:var(--white); border-radius:26px; padding:16px;
+    box-shadow:var(--shadow); display:flex; flex-direction:column; min-height:0; position:relative; overflow:hidden;}
+  .counter{background:repeating-linear-gradient(90deg,var(--wood) 0 22px,var(--wood-dark) 22px 24px);
+    height:14px; border-radius:8px; margin-top:auto;}
+  .char{font-size:56px; text-align:center; line-height:1; transition:transform .25s;}
+  .char.happy{animation:bounce .5s;}
+  .emojis{font-size:28px; text-align:center; letter-spacing:5px; min-height:32px; margin-top:2px;}
+  .bubble{background:var(--cream); border:3px solid #fff; border-radius:20px; padding:14px 16px;
+    box-shadow:0 4px 0 rgba(0,0,0,.08); position:relative; margin:8px 0 14px;}
+  .bubble:after{content:""; position:absolute; bottom:-14px; left:50%; transform:translateX(-50%);
+    border:8px solid transparent; border-top-color:var(--cream);}
+  .ask{font-size:18px; font-weight:800; line-height:1.65; text-align:center;}
+  .ask b{color:var(--coral);}
+
+  .answers{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:6px;}
+  .ans{border:none; border-radius:20px; padding:20px 4px; font-size:26px; font-weight:900;
+    background:var(--yellow); color:var(--ink); box-shadow:0 5px 0 rgba(0,0,0,.15); cursor:pointer; transition:transform .08s;}
+  .ans:active{transform:translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.15);}
+  .ans.ok{background:var(--green); color:#fff; animation:pop .4s;}
+  .ans.no{background:#FF9AA2; animation:shake .4s;}
+  .ans:disabled{opacity:.55;}
+
+  .feedback{text-align:center; font-weight:900; font-size:18px; min-height:24px; margin-top:8px;}
+  .feedback.good{color:var(--green);} .feedback.bad{color:var(--coral);}
+
+  .overlay{position:fixed; inset:0; background:rgba(90,70,50,.55); backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center; z-index:20; padding:20px;}
+  .card{background:#fff; border-radius:30px; padding:28px 24px; text-align:center; max-width:400px; width:100%;
+    box-shadow:0 12px 0 rgba(0,0,0,.18); animation:pop .45s;}
+  .card h1{font-size:30px; margin:6px 0;}
+  .card p{font-size:16px; color:var(--ink-soft); font-weight:700; line-height:1.6;}
+  .big-emoji{font-size:72px; line-height:1;}
+  .play-btn{border:none; border-radius:22px; padding:15px 30px; font-size:21px; font-weight:900;
+    background:var(--coral); color:#fff; box-shadow:0 6px 0 #d94f4f; cursor:pointer; margin-top:12px; width:100%;}
+  .play-btn:active{transform:translateY(3px); box-shadow:0 3px 0 #d94f4f;}
+  .play-btn.secondary{background:#EFE7DC; color:var(--ink-soft); box-shadow:0 5px 0 #d8cbb8; font-size:17px; padding:12px;}
+  .play-btn.secondary:active{box-shadow:0 2px 0 #d8cbb8;}
+  .shop-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px;}
+  .shop-pick{border:none; border-radius:20px; padding:16px 8px; background:var(--cream);
+    box-shadow:0 5px 0 rgba(0,0,0,.12); cursor:pointer; font-weight:900; font-size:16px; transition:transform .08s;}
+  .shop-pick:active{transform:translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.12);}
+  .shop-pick .pe{font-size:42px; display:block; line-height:1.2;}
+  .proc-btn{border:none; border-radius:18px; padding:11px 6px; font-weight:900; font-size:15px; width:100%;
+    background:var(--blue); color:#fff; box-shadow:0 4px 0 #3a78d0; cursor:pointer;}
+  .proc-btn:active{transform:translateY(2px); box-shadow:0 2px 0 #3a78d0;}
+  .proc-card{max-width:430px; text-align:left; max-height:88vh; overflow:auto;}
+  .proc-goal{text-align:center; font-weight:800; color:var(--ink-soft); font-size:14px; margin:4px 0 10px; line-height:1.5;}
+  .pbar-wrap{height:18px; background:#EEE3D4; border-radius:20px; overflow:hidden; margin-bottom:12px;}
+  .pbar{height:100%; width:0%; background:linear-gradient(90deg,#7ED957,#FFC93C); transition:width .25s; border-radius:20px;}
+  .pbar.over{background:var(--coral);}
+  .prow{display:flex; align-items:center; gap:8px; background:var(--cream); border-radius:16px; padding:8px 10px; margin-bottom:8px;}
+  .prow .pe2{font-size:30px;}
+  .prow .pinfo{flex:1; font-weight:800; font-size:14px; line-height:1.3;}
+  .prow .pinfo small{color:var(--ink-soft); font-weight:700;}
+  .stepper{display:flex; align-items:center; gap:6px;}
+  .stepper button{width:34px; height:34px; border:none; border-radius:12px; font-size:22px; font-weight:900;
+    background:#fff; box-shadow:0 3px 0 rgba(0,0,0,.12); cursor:pointer; color:var(--coral);}
+  .stepper button:active{transform:translateY(2px);}
+  .stepper .qty{min-width:24px; text-align:center; font-weight:900; font-size:18px;}
+  .psub{min-width:46px; text-align:right; font-weight:900; color:var(--blue); font-size:14px;}
+  .ptotals{display:flex; justify-content:space-between; font-weight:900; font-size:17px; margin:10px 2px;}
+  .ptotals .rem.bad{color:var(--coral);}
+  .ptotals .rem.ok{color:var(--green);}
+  .ops-row{display:flex; gap:8px;}
+  .proc-btn.cash{background:var(--green); box-shadow:0 4px 0 #2fa257;}
+  .proc-btn.cash:active{box-shadow:0 2px 0 #2fa257;}
+  .cash-card{max-width:440px; text-align:center; max-height:90vh; overflow:auto;}
+  .cash-card .char{font-size:48px;}
+  .cash-items{font-weight:900; font-size:18px; margin:4px 0;}
+  .cash-line{font-weight:900; font-size:18px; margin:4px 0;}
+  .cash-pay{font-weight:800; font-size:15px; margin:6px 0;}
+  .cash-pay .note{display:inline-block; background:#FFF4C2; border:2px solid var(--yellow);
+    border-radius:10px; padding:2px 10px; font-weight:900; font-size:17px;}
+  .cash-aid{margin:12px 0;}
+  .aid-label{font-weight:900; color:var(--ink-soft); font-size:13px; margin-bottom:6px;}
+  .ver{display:inline-block; font-family:"Courier New",monospace; background:#fff;
+    border:3px dashed var(--yellow); border-radius:14px; padding:10px 16px;}
+  .ver .row{display:flex; justify-content:flex-end; align-items:center;}
+  .ver .cell{width:22px; text-align:center; font-size:26px; font-weight:900; color:var(--ink);}
+  .ver .cell.head{font-size:12px; color:var(--ink-soft); font-weight:700;}
+  .ver .opcell{width:20px; text-align:center; font-size:24px; font-weight:900; color:var(--coral);}
+  .ver .line{border-top:3px solid var(--ink); margin:4px 0 2px;}
+  .ver .acell{width:22px; text-align:center; font-size:12px; color:var(--coral); font-weight:900; line-height:1; height:15px;}
+  .ver .strike{position:relative; display:inline-block; padding:0 1px;}
+  .ver .strike:after{content:""; position:absolute; left:0; right:0; top:50%; border-top:2px solid var(--coral); transform:rotate(-15deg);}
+  .ver .cell.ansc{background:#FFF7DD; border-radius:6px; cursor:pointer;}
+  .ver .cell.ansc.active{outline:3px solid var(--coral);}
+  .ver .cell.ansc.filled{background:#D6F5DF;}
+  .pad{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; max-width:260px; margin:12px auto 4px;}
+  .pad button{border:none; border-radius:14px; padding:14px 0; font-size:22px; font-weight:900;
+    background:#fff; color:var(--ink); box-shadow:0 4px 0 rgba(0,0,0,.12); cursor:pointer;}
+  .pad button:active{transform:translateY(2px); box-shadow:0 2px 0 rgba(0,0,0,.12);}
+  .pad button.ok{background:var(--green); color:#fff; box-shadow:0 4px 0 #2fa257;}
+  .pad button.back{background:#EEE3D4; color:var(--ink-soft);}
+  .note-bill{display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+    width:84px; height:48px; border-radius:8px; color:#fff; box-shadow:0 3px 0 rgba(0,0,0,.2);
+    border:2px solid rgba(255,255,255,.55); margin:3px; vertical-align:middle;}
+  .note-bill small{font-size:9px; opacity:.95; font-weight:800; letter-spacing:1px;}
+  .note-bill .v{font-size:20px; font-weight:900; line-height:1;}
+  .b10{background:#7E57C2;} .b20{background:#2F80C9;} .b50{background:#2E9E5B;} .b100{background:#C0413B;}
+  .coin{display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%;
+    font-weight:900; color:#6b4e16; margin:3px; box-shadow:0 3px 0 rgba(0,0,0,.2); vertical-align:middle;
+    background:radial-gradient(circle at 35% 30%,#FFE9A8,#E8B23C); border:2px solid #d9a02c; font-size:13px;}
+  .money-row{margin:8px 0; line-height:1;}
+  .hidden{display:none !important;}
+  .confetti{position:fixed; top:-40px; font-size:24px; z-index:25; animation:fall linear forwards; pointer-events:none;}
+
+  @keyframes bounce{0%,100%{transform:translateY(0)}30%{transform:translateY(-14px)}60%{transform:translateY(-4px)}}
+  @keyframes pop{0%{transform:scale(.7)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+  @keyframes fall{to{transform:translateY(105vh) rotate(360deg); opacity:.9}}
+  @media (prefers-reduced-motion:reduce){*{animation:none !important; transition:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hud">
+    <div class="shop-name"><span class="emoji" id="shopEmoji">🛒</span> <span id="shopName">糖果手推車</span></div>
+    <div class="chips">
+      <div class="chip lv-chip">LV <span id="lv">1</span></div>
+      <div class="chip">⭐ <span id="stars">0</span></div>
+      <div class="chip">💰 <span id="coins">0</span></div>
+      <button class="reset" id="resetBtn" title="主目錄">↺</button>
+    </div>
+  </div>
+  <div class="bar-wrap"><div class="bar" id="bar"></div></div>
+
+  <div class="roles">
+    <button class="role-btn active" id="roleBoss">🧑‍🍳 我做老闆</button>
+    <button class="role-btn" id="roleCust">🙋 我做客人</button>
+  </div>
+  <div class="ops-row">
+    <button class="proc-btn" id="procBtn">💼 採購部</button>
+    <button class="proc-btn cash" id="cashBtn">🧾 收銀台</button>
+  </div>
+
+  <div class="stage">
+    <div class="char" id="char">🙂</div>
+    <div class="emojis" id="emojis"></div>
+    <div class="bubble"><div class="ask" id="ask">準備好未？</div></div>
+    <div class="answers" id="answers"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="counter"></div>
+  </div>
+</div>
+
+<div class="overlay" id="startScreen">
+  <div class="card">
+    <div class="big-emoji">🛒</div>
+    <h1>升呢小老闆</h1>
+    <p>幫小朋友計數、找錢、做乘數，賺夠錢就開大舖！<br>由糖果手推車一路升到超級市場 🎉</p>
+    <div id="startBtns"></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="levelScreen">
+  <div class="card">
+    <div class="big-emoji" id="luEmoji">🎉</div>
+    <h1 id="luTitle">升級喇！</h1>
+    <p id="luText"></p>
+    <button class="play-btn" id="luBtn">繼續做生意 ▶</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="cashScreen">
+  <div class="card cash-card">
+    <h1>🧾 收銀台</h1>
+    <div class="char" id="cashFace">🙂</div>
+    <div class="cash-items" id="cashItems"></div>
+    <div class="cash-line" id="cashCost"></div>
+    <div class="cash-pay" id="cashPay"></div>
+    <div class="cash-aid">
+      <div class="aid-label">直式計一計 ✏️（由個位開始減）</div>
+      <div id="cashVer"></div>
+    </div>
+    <div class="ask" id="cashAsk">填一填：要找返幾多？（由個位開始）</div>
+    <div id="cashPad" class="pad"></div>
+    <div class="feedback" id="cashFb"></div>
+    <button class="play-btn secondary" id="cashCancel">返去</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="procScreen">
+  <div class="card proc-card">
+    <h1 style="text-align:center">💼 採購部</h1>
+    <div class="proc-goal" id="procGoal"></div>
+    <div class="pbar-wrap"><div class="pbar" id="pbar"></div></div>
+    <div id="procRows"></div>
+    <div class="ptotals"><span>已用 $<span id="pSpent">0</span></span><span class="rem" id="pRem"></span></div>
+    <button class="play-btn" id="procConfirm">確認入貨 ✔</button>
+    <button class="play-btn secondary" id="procCancel">遲啲先</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="chooseScreen">
+  <div class="card">
+    <div class="big-emoji">🏬</div>
+    <h1>開零售店喇！</h1>
+    <p>你想開邊一間舖頭？揀一間嚟做老闆啦～</p>
+    <div class="shop-grid" id="shopGrid"></div>
+  </div>
+</div>
+
+<script src="./cars.js"></script>
+<script src="./garage.js"></script>
+<script>
+(function(){
+  "use strict";
+  const KEY="shopTycoonSave_v1";
+  // pool item = [emoji, 名, 量詞]
+  const TIERS = [
+    { name:"糖果手推車", emoji:"🛒", unlockLv:1, choose:false,
+      pool:[["🍬","糖","粒"],["🍭","波板糖","支"],["🍫","朱古力","排"],["🍪","曲奇","塊"]] },
+    { name:"小賣部", emoji:"🏪", unlockLv:3, choose:false,
+      pool:[["🍙","飯團","個"],["🍟","薯條","份"],["🥤","汽水","杯"],["🌭","熱狗","條"],["🍡","糰子","串"]] },
+    { name:"零售店", emoji:"🏬", unlockLv:5, choose:true,
+      choices:[
+        {name:"文具店", emoji:"✏️", pool:[["✏️","鉛筆","支"],["📒","筆記簿","本"],["🖍️","蠟筆","盒"],["📏","間尺","把"],["🩹","貼紙","張"]]},
+        {name:"玩具店", emoji:"🧸", pool:[["🧸","公仔","個"],["🚗","玩具車","架"],["🪁","風箏","個"],["🎈","氣球","個"],["🪀","搖搖","個"]]},
+        {name:"服裝店", emoji:"👕", pool:[["👕","T恤","件"],["🧦","襪","對"],["🧢","帽","頂"],["🩳","短褲","條"],["👟","波鞋","對"]]},
+        {name:"寵物店", emoji:"🐶", pool:[["🦴","狗骨","條"],["🐟","貓糧","包"],["🎾","波波","個"],["🪥","梳","把"],["🐾","狗帶","條"]]},
+      ] },
+    { name:"普通市場", emoji:"🥕", unlockLv:7, choose:false,
+      pool:[["🥕","紅蘿蔔","條"],["🐟","魚","條"],["🥬","菜","棵"],["🍗","雞","隻"],["🍅","番茄","個"],["🥔","薯仔","個"]] },
+    { name:"超級市場", emoji:"🛒", unlockLv:9, choose:false,
+      pool:[["🍎","蘋果","個"],["🥛","牛奶","盒"],["🍞","麵包","個"],["🥚","雞蛋","隻"],["🍌","香蕉","條"],["🧀","芝士","件"]] },
+  ];
+  const NAMES = ["小明","小美","小強","小芳","樂樂","欣欣","阿俊","妹妹"];
+  const FACES = ["😀","😃","🙂","😊","🧒","👦","👧","🧑"];
+
+  let S;
+  function defaults(){ return { lv:1,stars:0,coins:0,role:"boss",progress:0,need:4,
+    chosenShop:null,ease:0,streakGood:0,seen:[],q:null,tries:0 }; }
+
+  const $ = id => document.getElementById(id);
+  const rnd = n => Math.floor(Math.random()*n);
+  const ri = (a,b)=> a + rnd(Math.max(1,b-a+1));   // a..b
+  const pick = arr => arr[rnd(arr.length)];
+
+  // ---- 存檔 ----
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify({
+    lv:S.lv,stars:S.stars,coins:S.coins,role:S.role,progress:S.progress,need:S.need,
+    chosenShop:S.chosenShop,ease:S.ease,streakGood:S.streakGood,seen:S.seen })); }catch(e){} }
+  function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } }
+  function clearSave(){ try{ localStorage.removeItem(KEY); }catch(e){} }
+
+  function tierFor(lv){ let t=TIERS[0]; for(const x of TIERS){ if(lv>=x.unlockLv) t=x; } return t; }
+  function shop(){
+    const t=tierFor(S.lv);
+    if(t.choose && S.chosenShop) return {name:S.chosenShop.name,emoji:S.chosenShop.emoji,pool:S.chosenShop.pool,t};
+    if(t.choose) return {name:t.name,emoji:t.emoji,pool:t.choices[0].pool,t};
+    return {name:t.name,emoji:t.emoji,pool:t.pool,t};
+  }
+  function effLevel(){ return Math.max(1, Math.min(12, S.lv + S.ease)); }
+  function actor(){ return S.role==="cust" ? "你" : pick(NAMES); }
+  function otherName(used){ let n; do{ n=pick(NAMES); }while(n===used); return n; }
+  function twoItems(pool){ const a=pick(pool); let b; do{ b=pick(pool); }while(b[1]===a[1] && pool.length>1); return [a,b]; }
+  function rep(e,n){ return e.repeat(Math.min(4,Math.max(1,n))); }
+
+  // ---- 題型生成 ----
+  function gen(id, eL, pool){
+    const A=actor();
+    if(id==="add"){ // 加法（中段開始進位）
+      let a,b,it=pick(pool);
+      if(eL<=2){ a=ri(2,7); b=ri(1,9-a); }
+      else if(eL<=4){ a=ri(4,9); b=ri(Math.max(2,11-a),9); }          // 個位進位 11~18
+      else if(eL<=6){ const t=ri(1,4),o=ri(2,8); a=t*10+o; b=ri(10-o,9);} // 兩位+個位 進位
+      else { const o1=ri(2,8),o2=ri(10-o1,9); a=ri(1,4)*10+o1; b=ri(1,4)*10+o2; } // 兩位+兩位 進位
+      return {text:`${A}本來有 <b>${a}</b>${it[2]}${it[1]}，再買多 <b>${b}</b>${it[2]}，總共有幾多${it[2]}？`,
+        answer:a+b, unit:"", emojis:rep(it[0],3), sig:`add${it[1]}${a}+${b}`};
+    }
+    if(id==="sub"){ // 減法（中段開始退位）
+      let a,b;
+      if(eL<=2){ a=ri(4,9); b=ri(1,a-1); }
+      else if(eL<=4){ a=ri(11,17); b=ri(a%10+1,9); }                  // 借位（十幾減個位）
+      else if(eL<=6){ const t=ri(2,4),o=ri(1,6); a=t*10+o; b=ri(o+1,9);} // 兩位減個位 借位
+      else { const t1=ri(3,6),o1=ri(1,7); a=t1*10+o1; b=ri(1,t1-1)*10+ri(o1+1,9);} // 兩位減兩位 借位
+      return {text:`${A}有 <b>$${a}</b>，用咗 <b>$${b}</b>，仲剩返幾多錢？`,
+        answer:a-b, unit:"$", emojis:"💰", sig:`sub${a}-${b}`};
+    }
+    if(id==="mul"){ // 乘數（時間表）
+      let p,n,it=pick(pool);
+      if(eL<=4){ p=pick([2,3,5,10]); n=ri(2,5); }
+      else if(eL<=6){ p=ri(2,5); n=ri(2,6); }
+      else { p=ri(2,9); n=ri(2,9); }
+      return {text:`一${it[2]}${it[1]}賣 <b>$${p}</b>，${A}買咗 <b>${n}</b>${it[2]}，總共要畀幾多錢？`,
+        answer:p*n, unit:"$", emojis:rep(it[0],n), sig:`mul${it[1]}${p}x${n}`};
+    }
+    if(id==="buy"){ // 兩步：銀包 − 單價×件數（乘完退位減）
+      const it=pick(pool); const p=ri(2,5), n=ri(2,5); const cost=p*n;
+      const w=(Math.floor(cost/10)+1)*10 + pick([0,5]);
+      return {text:`${A}個銀包有 <b>$${w}</b>，一${it[2]}${it[1]}賣 <b>$${p}</b>。${A}買咗 <b>${n}</b>${it[2]}，仲剩返幾多錢？`,
+        answer:w-cost, unit:"$", emojis:rep(it[0],n), sig:`buy${it[1]}${w}.${p}x${n}`};
+    }
+    if(id==="cmp"){ // 比較（減法）
+      const it=pick(pool), B=otherName(A);
+      let a,b; if(eL<=4){ a=ri(6,15); b=ri(1,a-1);} else { a=ri(15,40); b=ri(5,a-1);}
+      return {text:`${A}有 <b>${a}</b>${it[2]}${it[1]}，${B}有 <b>${b}</b>${it[2]}，${A}比${B}多幾多${it[2]}？`,
+        answer:a-b, unit:"", emojis:it[0], sig:`cmp${it[1]}${a}-${b}`};
+    }
+    if(id==="add3"){ // 三樣嘢加總價（多進位）
+      const a=pick(pool); let b,c; do{b=pick(pool);}while(b[1]===a[1]); do{c=pick(pool);}while(c[1]===a[1]||c[1]===b[1]);
+      const p1=ri(2,9),p2=ri(2,9),p3=ri(2,9);
+      return {text:`${A}買咗 ${a[1]}(<b>$${p1}</b>)、${b[1]}(<b>$${p2}</b>)、${c[1]}(<b>$${p3}</b>)，總共要畀幾多錢？`,
+        answer:p1+p2+p3, unit:"$", emojis:a[0]+b[0]+c[0], sig:`add3${p1}.${p2}.${p3}`};
+    }
+  }
+
+  function band(eL){
+    if(eL<=2) return ["add","sub"];
+    if(eL<=4) return ["add","sub","mul"];
+    if(eL<=6) return ["add","sub","mul","buy","cmp"];
+    return ["add","sub","mul","buy","cmp","add3"];
+  }
+
+  function makeQuestion(){
+    const sh=shop(), eL=effLevel(), b=band(eL);
+    S.tries=0; let q=null;
+    for(let i=0;i<30;i++){ q=gen(pick(b),eL,sh.pool); if(q && !S.seen.includes(q.sig)) break; }
+    S.seen.push(q.sig); if(S.seen.length>40) S.seen.shift();
+    q.face=pick(FACES); S.q=q; render();
+  }
+
+  function options(correct){
+    const sp = correct>=20?5:3;
+    const set=new Set([correct]); let g=0;
+    while(set.size<3 && g++<60){ let d=correct+(rnd(2)?1:-1)*ri(1,sp); if(d>=0) set.add(d); }
+    let k=0; while(set.size<3) set.add(correct+(++k));
+    return [...set].sort(()=>Math.random()-0.5);
+  }
+
+  function render(){
+    const sh=shop();
+    $("shopName").textContent=sh.name; $("shopEmoji").textContent=sh.emoji;
+    $("lv").textContent=S.lv; $("stars").textContent=S.stars; $("coins").textContent=S.coins;
+    $("bar").style.width=Math.min(100,(S.progress/S.need)*100)+"%";
+    const q=S.q;
+    $("char").textContent=q.face; $("char").classList.remove("happy");
+    $("emojis").textContent=q.emojis; $("ask").innerHTML=q.text;
+    const ansEl=$("answers"); ansEl.innerHTML="";
+    options(q.answer).forEach(v=>{ const btn=document.createElement("button"); btn.className="ans";
+      btn.textContent=q.unit==="$"?("$"+v):v; btn.onclick=()=>choose(btn,v); ansEl.appendChild(btn); });
+    $("feedback").textContent=""; $("feedback").className="feedback";
+  }
+
+  function choose(btn,val){
+    const q=S.q;
+    if(val===q.answer){
+      btn.classList.add("ok"); [...$("answers").children].forEach(b=>b.disabled=true);
+      $("char").textContent="😄"; $("char").classList.add("happy");
+      if(S.tries===0){ S.streakGood++; if(S.streakGood>=2 && S.ease<0){ S.ease++; S.streakGood=0; } }
+      else S.streakGood=0;
+      const reward=S.tries===0?3:1; S.coins+=reward; S.stars+=1; S.progress+=1;
+      const fb=$("feedback"); fb.className="feedback good";
+      fb.textContent=S.tries===0?("叻仔！+"+reward+" 💰"):"啱喇！+1 💰";
+      $("bar").style.width=Math.min(100,(S.progress/S.need)*100)+"%";
+      save();
+      try{ if(window.Garage) Garage.drop('small'); }catch(e){}
+      setTimeout(()=>{ if(S.progress>=S.need) levelUp(); else makeQuestion(); },950);
+    } else {
+      S.tries++; S.streakGood=0;
+      if(S.tries>=2 && S.ease>-3){ S.ease--; }
+      btn.classList.add("no"); btn.disabled=true; $("char").textContent="🤔";
+      const fb=$("feedback"); fb.className="feedback bad";
+      fb.textContent=S.tries>=2?"唔緊要，望返條題慢慢數 😊":"差少少，再諗多次 💪";
+      setTimeout(()=>btn.classList.remove("no"),450);
+    }
+  }
+
+  function levelUp(){
+    const before=tierFor(S.lv);
+    S.lv+=1; S.progress=0; S.need=Math.min(8,4+Math.floor(S.lv/2));
+    const after=tierFor(S.lv); confetti();
+    if(after.choose && !S.chosenShop){ save(); showChooser(after); return; }
+    const newShop=after.name!==before.name;
+    $("luEmoji").textContent=newShop?after.emoji:"🎉";
+    $("luTitle").textContent=newShop?"開大舖喇！":"升級喇！";
+    $("luText").innerHTML=newShop
+      ? `恭喜！你而家係 <b>${after.name}</b> 嘅老闆 ${after.emoji}<br>題目會難少少，但你一定得 💪`
+      : `你做得好叻！而家係 LV ${S.lv}。<br>繼續加油 🌟`;
+    save(); $("levelScreen").classList.remove("hidden"); render();
+    try{ if(window.Garage) Garage.drop('big'); }catch(e){}
+  }
+
+  function showChooser(tier){
+    const grid=$("shopGrid"); grid.innerHTML="";
+    tier.choices.forEach(c=>{ const b=document.createElement("button"); b.className="shop-pick";
+      b.innerHTML=`<span class="pe">${c.emoji}</span>${c.name}`;
+      b.onclick=()=>{ S.chosenShop=c; save(); $("chooseScreen").classList.add("hidden"); makeQuestion(); };
+      grid.appendChild(b); });
+    $("chooseScreen").classList.remove("hidden");
+  }
+
+  function confetti(){
+    const em=["🎉","⭐","💰","🍬","✨","🎈"];
+    for(let i=0;i<26;i++){ const c=document.createElement("div"); c.className="confetti"; c.textContent=pick(em);
+      c.style.left=rnd(100)+"vw"; c.style.animationDuration=(1.6+Math.random()*1.6)+"s";
+      c.style.animationDelay=(Math.random()*.5)+"s"; document.body.appendChild(c); setTimeout(()=>c.remove(),3600);}
+  }
+
+  function setRole(r){ S.role=r;
+    $("roleBoss").classList.toggle("active",r==="boss");
+    $("roleCust").classList.toggle("active",r==="cust");
+    save(); if(S.q) makeQuestion();
+  }
+
+  // ---- 開始畫面 ----
+  function buildStart(){
+    const sv=load(); const box=$("startBtns"); box.innerHTML="";
+    if(sv && sv.lv){
+      const cont=document.createElement("button"); cont.className="play-btn";
+      cont.textContent=`繼續 (LV ${sv.lv}) ▶`;
+      cont.onclick=()=>{ S=Object.assign(defaults(), sv); if(!Array.isArray(S.seen)) S.seen=[];
+        S.role==="cust"?setRoleUI("cust"):setRoleUI("boss");
+        $("startScreen").classList.add("hidden"); makeQuestion(); };
+      box.appendChild(cont);
+      const fresh=document.createElement("button"); fresh.className="play-btn secondary";
+      fresh.textContent="由頭開始"; fresh.onclick=startFresh; box.appendChild(fresh);
+    } else {
+      const go=document.createElement("button"); go.className="play-btn";
+      go.textContent="開始玩 ▶"; go.onclick=startFresh; box.appendChild(go);
+    }
+  }
+  function setRoleUI(r){ $("roleBoss").classList.toggle("active",r==="boss"); $("roleCust").classList.toggle("active",r==="cust"); }
+  function startFresh(){ S=defaults(); clearSave(); setRoleUI("boss");
+    $("startScreen").classList.add("hidden"); makeQuestion(); }
+
+  $("luBtn").onclick=()=>{ $("levelScreen").classList.add("hidden"); makeQuestion(); };
+  $("roleBoss").onclick=()=>setRole("boss");
+  $("roleCust").onclick=()=>setRole("cust");
+  $("resetBtn").onclick=()=>{ save(); buildStart(); $("startScreen").classList.remove("hidden"); };
+
+  // ---- 採購部 ----
+  let proc=null;
+  function openProc(){
+    const sh=shop(), eL=effLevel();
+    const budget = 20 + 10*Math.min(6, Math.floor((S.lv-1)/2));   // 20..80
+    const priceMax = eL<=4?3 : (eL<=6?5:8);
+    const items=[], used=[];
+    while(items.length<3 && items.length<sh.pool.length){
+      const it=pick(sh.pool); if(used.includes(it[1])) continue; used.push(it[1]);
+      items.push({emoji:it[0], name:it[1], mw:it[2], price:ri(1,priceMax), qty:0});
+    }
+    const minP=Math.min.apply(null, items.map(i=>i.price));
+    const desired=5+Math.floor(S.lv/2);
+    const target=Math.max(3, Math.min(desired, Math.floor(budget/minP)));
+    proc={budget, items, target};
+    $("procGoal").innerHTML=`預算 <b>$${budget}</b> ・ 目標入貨 <b>${target}</b> 件或以上<br>記住唔好超支！`;
+    renderProc();
+    $("procScreen").classList.remove("hidden");
+  }
+  function renderProc(){
+    const rows=$("procRows"); rows.innerHTML="";
+    proc.items.forEach((it,idx)=>{
+      const row=document.createElement("div"); row.className="prow";
+      row.innerHTML=`<span class="pe2">${it.emoji}</span>
+        <span class="pinfo">${it.name}<br><small>一${it.mw} $${it.price}</small></span>
+        <span class="stepper"><button data-d="-1" data-i="${idx}">－</button>
+          <span class="qty">${it.qty}</span>
+          <button data-d="1" data-i="${idx}">＋</button></span>
+        <span class="psub">$${it.price*it.qty}</span>`;
+      rows.appendChild(row);
+    });
+    rows.querySelectorAll("button").forEach(b=>{
+      b.onclick=()=>{ const i=+b.dataset.i, d=+b.dataset.d;
+        proc.items[i].qty=Math.max(0, Math.min(12, proc.items[i].qty+d)); renderProc(); };
+    });
+    const spent=proc.items.reduce((s,i)=>s+i.price*i.qty,0);
+    const qty=proc.items.reduce((s,i)=>s+i.qty,0);
+    const rem=proc.budget-spent;
+    $("pSpent").textContent=spent;
+    const remEl=$("pRem");
+    if(rem<0){ remEl.textContent="超支 $"+(-rem)+" ❌"; remEl.className="rem bad"; }
+    else { remEl.textContent="剩 $"+rem+"（共 "+qty+" 件）"; remEl.className="rem ok"; }
+    const pbar=$("pbar"); pbar.style.width=Math.min(100, spent/proc.budget*100)+"%"; pbar.classList.toggle("over", rem<0);
+    const ok = rem>=0 && qty>=proc.target;
+    const cf=$("procConfirm"); cf.disabled=!ok; cf.style.opacity=ok?1:.5;
+  }
+  function confirmProc(){
+    const spent=proc.items.reduce((s,i)=>s+i.price*i.qty,0);
+    const qty=proc.items.reduce((s,i)=>s+i.qty,0);
+    if(spent>proc.budget || qty<proc.target) return;
+    S.coins+=5; S.stars+=3; save(); confetti();
+    try{ if(window.Garage) Garage.drop('medium'); }catch(e){}
+    $("procScreen").classList.add("hidden");
+    $("luEmoji").textContent="📦"; $("luTitle").textContent="入貨成功！";
+    $("luText").innerHTML=`你用咗 <b>$${spent}</b> 入咗 <b>${qty}</b> 件貨，<br>仲剩返 $${proc.budget-spent} 預算，做得好叻！<br>⭐ +3 ・ 💰 +5`;
+    $("levelScreen").classList.remove("hidden");
+  }
+  $("procBtn").onclick=openProc;
+  $("procConfirm").onclick=confirmProc;
+  $("procCancel").onclick=()=>$("procScreen").classList.add("hidden");
+
+  // ---- 收銀台（港幣紙幣 + 真・填直式 + 借位提示）----
+  let cash=null;
+  function noteEl(v){ return `<span class="note-bill b${v}"><small>HK$</small><span class="v">${v}</span></span>`; }
+  function coinEl(v){ return `<span class="coin">$${v}</span>`; }
+  function hkVisual(amt){ let h='';
+    for(const v of [50,20,10]){ while(amt>=v){ h+=noteEl(v); amt-=v; } }
+    for(const v of [5,2,1]){ while(amt>=v){ h+=coinEl(v); amt-=v; } }
+    return h || '<span style="font-weight:900">唔使找 🎉</span>'; }
+
+  function openCash(){
+    const sh=shop(), eL=effLevel(); const combo = eL>=5 && Math.random()<0.5;
+    const nItems=eL<=4?1:(1+rnd(2)); const items=[], used=[]; let cost=0;
+    for(let i=0;i<nItems;i++){ let it; do{ it=pick(sh.pool); }while(used.includes(it[1])&&sh.pool.length>1); used.push(it[1]);
+      const p=eL<=4?ri(2,9):(eL<=6?ri(3,18):ri(8,38)); items.push({e:it[0],n:it[1],p}); cost+=p; }
+    if(cost>48) cost=48;
+    let paid, pieces;
+    const baseNote=[10,20,50].find(v=>v>cost)||50;
+    if(combo){ const coin=pick([1,2,5]); paid=baseNote+coin; pieces=[['note',baseNote],['coin',coin]]; }
+    else { paid=baseNote; pieces=[['note',baseNote]]; }
+    const w=Math.max(String(paid).length,String(cost).length);
+    cash={items,cost,paid,pieces,combo,change:paid-cost,face:pick(FACES),
+          ans:Array(w).fill(null),active:w-1,done:false,w};
+    renderCash(); $("cashScreen").classList.remove("hidden");
+  }
+
+  function subCols(paid,cost,w){
+    const top=String(paid).padStart(w,'0').split('').map(Number);
+    const bot=String(cost).padStart(w,'0').split('').map(Number);
+    const result=Array(w), recv=Array(w).fill(false), lent=Array(w).fill(false);
+    let borrow=0;
+    for(let i=w-1;i>=0;i--){ const lentNow=borrow===1; lent[i]=lentNow;
+      let t=top[i]-(lentNow?1:0);
+      if(t<bot[i]){ recv[i]=true; t+=10; borrow=1; } else borrow=0;
+      result[i]=t-bot[i]; }
+    return {top,bot,result,recv,lent};
+  }
+  function renderCashVer(){
+    const c=cash, w=c.w, S2=subCols(c.paid,c.cost,w);
+    const heads=['百','十','個'].slice(3-w);
+    let h='<div class="ver">';
+    let an=''; for(let i=0;i<w;i++){ let t=''; if(S2.lent[i]) t=String(S2.top[i]-1); else if(S2.recv[i]) t='1';
+      an+=`<span class="acell">${t}</span>`; }
+    h+=`<div class="row"><span class="opcell"></span>${an}</div>`;
+    h+=`<div class="row"><span class="opcell"></span>${heads.map(x=>`<span class="cell head">${x}</span>`).join('')}</div>`;
+    let tp=''; for(let i=0;i<w;i++){ const d=S2.top[i]; const dd=(i===0&&d===0)?'':d;
+      tp+=`<span class="cell">${S2.lent[i]?`<span class="strike">${dd}</span>`:dd}</span>`; }
+    h+=`<div class="row"><span class="opcell"></span>${tp}</div>`;
+    let bt=''; for(let i=0;i<w;i++){ const d=S2.bot[i]; const dd=(i===0&&d===0)?'':d; bt+=`<span class="cell">${dd}</span>`; }
+    h+=`<div class="row"><span class="opcell">−</span>${bt}</div>`;
+    h+='<div class="line"></div>';
+    let a=''; for(let i=0;i<w;i++){ const v=c.ans[i]; const cls=c.done?' filled':(i===c.active?' active':'');
+      a+=`<span class="cell ansc${cls}" data-col="${i}">${v==null?'·':v}</span>`; }
+    h+=`<div class="row"><span class="opcell"></span>${a}</div>`;
+    h+='</div>';
+    $("cashVer").innerHTML=h;
+    $("cashVer").querySelectorAll('.ansc').forEach(el=>{ el.onclick=()=>{ if(cash.done) return;
+      cash.active=+el.dataset.col; renderCashVer(); }; });
+  }
+  function buildPad(){
+    const pad=$("cashPad"); pad.innerHTML='';
+    ['1','2','3','4','5','6','7','8','9','⌫','0','✔'].forEach(k=>{
+      const b=document.createElement('button'); b.textContent=k;
+      if(k==='⌫') b.className='back'; if(k==='✔') b.className='ok';
+      b.onclick=()=>padKey(k); pad.appendChild(b); });
+  }
+  function padKey(k){
+    if(cash.done) return;
+    if(k==='✔'){ cashCheck(); return; }
+    const w=cash.w;
+    if(k==='⌫'){ if(cash.ans[cash.active]!=null){ cash.ans[cash.active]=null; }
+      else if(cash.active<w-1){ cash.active++; cash.ans[cash.active]=null; } renderCashVer(); return; }
+    cash.ans[cash.active]=+k; if(cash.active>0) cash.active--; renderCashVer();
+  }
+  function renderCash(){
+    const c=cash;
+    $("cashFace").textContent=c.face;
+    $("cashItems").innerHTML=c.items.map(i=>`${i.e} $${i.p}`).join('　');
+    $("cashCost").innerHTML=`貨價總共 <b>$${c.cost}</b>`;
+    const pv=c.pieces.map(p=>p[0]==='note'?noteEl(p[1]):coinEl(p[1])).join('');
+    $("cashPay").innerHTML = c.combo
+      ? `客人畀咗：<div class="money-row">${pv}</div>先加埋 = <b>$${c.paid}</b>，再計找贖`
+      : `客人畀咗：<div class="money-row">${pv}</div>`;
+    renderCashVer(); buildPad();
+    $("cashFb").textContent=""; $("cashFb").className="feedback";
+    $("cashCancel").textContent="返去";
+  }
+  function cashCheck(){
+    const c=cash; const num=parseInt(c.ans.map(d=>d==null?0:d).join('')||'0',10);
+    if(num===c.change){
+      c.done=true; S.coins+=4; S.stars+=2; save(); confetti(); renderCashVer();
+      try{ if(window.Garage) Garage.drop('medium'); }catch(e){}
+      const fb=$("cashFb"); fb.className="feedback good";
+      fb.innerHTML=`啱晒！找返 $${c.change}：<div class="money-row">${hkVisual(c.change)}</div>⭐ +2 ・ 💰 +4`;
+      $("cashCancel").textContent="完成 ✔";
+    } else {
+      const fb=$("cashFb"); fb.className="feedback bad";
+      fb.textContent="未啱喎，跟住上面紅色提示，由個位開始減 😊";
+    }
+  }
+  $("cashBtn").onclick=openCash;
+  $("cashCancel").onclick=()=>{ $("cashScreen").classList.add("hidden"); if(S.q) makeQuestion(); };
+
+  S=defaults();
+  buildStart();
+})();
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){ navigator.serviceWorker.register('./sw.js').catch(function(){}); });
+}
+</script>
+</body>
+</html>
