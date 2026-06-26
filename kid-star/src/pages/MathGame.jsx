@@ -6,26 +6,72 @@ import Backdrop from '../components/Backdrop'
 import Mascot from '../components/Mascot'
 
 const GAME_SECONDS = 60
+const rnd = (n) => Math.floor(Math.random() * n)
+// 主題情境(emoji + 名詞),令題目唔淨係乾數字
+const THEMES = [
+  { e: '🍎', n: '蘋果' },
+  { e: '⭐', n: '星星' },
+  { e: '🚗', n: '車仔' },
+  { e: '🍬', n: '糖' },
+  { e: '🐟', n: '魚' },
+  { e: '🎈', n: '氣球' },
+  { e: '🍪', n: '餅' },
+]
 
-// 隨機出一條心算題(加 / 減 / 乘),範圍啱小二
+// 隨機出一條心算題:有標準式、填空式、三個數、主題應用題,增加變化。
+// 答案一律係數字(用數字鍵盤作答)。
 function makeQuestion() {
-  const ops = ['+', '+', '-', '-', '×'] // 加減多啲、乘少啲
-  const op = ops[Math.floor(Math.random() * ops.length)]
-  let a, b, answer
-  if (op === '+') {
-    a = 1 + Math.floor(Math.random() * 49)
-    b = 1 + Math.floor(Math.random() * (99 - a))
-    answer = a + b
-  } else if (op === '-') {
-    a = 10 + Math.floor(Math.random() * 89)
-    b = 1 + Math.floor(Math.random() * a)
-    answer = a - b
-  } else {
-    a = 2 + Math.floor(Math.random() * 8) // 2..9
-    b = 2 + Math.floor(Math.random() * 8)
-    answer = a * b
+  const r = Math.random()
+
+  // 填空式:a + ? = c / a - ? = c
+  if (r < 0.25) {
+    if (Math.random() < 0.6) {
+      const a = 2 + rnd(40)
+      const b = 2 + rnd(40)
+      return { prompt: `${a} + ? = ${a + b}`, answer: b }
+    }
+    const a = 20 + rnd(60)
+    const b = 2 + rnd(a - 2)
+    return { prompt: `${a} − ? = ${a - b}`, answer: b }
   }
-  return { text: `${a} ${op} ${b}`, answer }
+
+  // 主題應用題(emoji 情境)
+  if (r < 0.5) {
+    const t = THEMES[rnd(THEMES.length)]
+    if (Math.random() < 0.5) {
+      const a = 2 + rnd(9)
+      const b = 2 + rnd(9)
+      return { prompt: `${t.e} 有 ${a} 個,再嚟 ${b} 個,共幾多?`, answer: a + b }
+    }
+    const a = 6 + rnd(12)
+    const b = 1 + rnd(5)
+    return { prompt: `${t.e} 有 ${a} 個,走咗 ${b} 個,仲有幾多?`, answer: a - b }
+  }
+
+  // 三個數連加
+  if (r < 0.62) {
+    const a = 1 + rnd(20)
+    const b = 1 + rnd(20)
+    const c = 1 + rnd(10)
+    return { prompt: `${a} + ${b} + ${c} = ?`, answer: a + b + c }
+  }
+
+  // 標準式 a op b = ?
+  const ops = ['+', '+', '−', '×']
+  const op = ops[rnd(ops.length)]
+  if (op === '+') {
+    const a = 1 + rnd(49)
+    const b = 1 + rnd(99 - a)
+    return { prompt: `${a} + ${b} = ?`, answer: a + b }
+  }
+  if (op === '−') {
+    const a = 10 + rnd(89)
+    const b = 1 + rnd(a)
+    return { prompt: `${a} − ${b} = ?`, answer: a - b }
+  }
+  const a = 2 + rnd(8)
+  const b = 2 + rnd(8)
+  return { prompt: `${a} × ${b} = ?`, answer: a * b }
 }
 
 // 限時心算:60 秒內答得越多越叻,答啱攞分,終結按分數賺星星
@@ -138,7 +184,9 @@ export default function MathGame({ go }) {
         }`}
       >
         <p className="text-lg font-bold text-sky-500">快啲計!</p>
-        <p className="mt-2 text-5xl font-extrabold text-slate-800">{q.text} = ?</p>
+        <p className={`mt-2 px-3 text-center font-extrabold text-slate-800 ${q.prompt.length > 12 ? 'text-3xl' : 'text-5xl'}`}>
+          {q.prompt}
+        </p>
         <div className="mt-4 flex min-h-[60px] min-w-[120px] items-center justify-center rounded-2xl bg-sky-50 px-6 text-4xl font-extrabold tracking-widest text-sky-700 ring-2 ring-sky-300">
           {value || <span className="text-sky-300">?</span>}
         </div>
