@@ -38,25 +38,43 @@ export default function TrafficLight({ go }) {
     timers.current = []
   }
 
+  const goGreen = () => {
+    greenAtRef.current = performance.now()
+    setP('green')
+    setHint('🟢 撳!')
+  }
+  const goRed = (msg) => {
+    setP('red')
+    setHint(msg)
+    addTimer(() => schedule(), 600 + Math.random() * 600)
+  }
+
+  // 出燈次序刻意冇規律,等小朋友冇得靠「背節奏」預測綠燈:
+  // - 有時直接紅燈
+  // - 有時完全冇黃燈,綠燈突然彈出
+  // - 黃燈長短隨機,而且黃燈之後有機會反轉做紅燈(奇兵!)
   const schedule = () => {
     setP('ready')
     setHint('預備…')
-    const wait = 350 + Math.random() * speedRef.current // 調快咗
+    const wait = 350 + Math.random() * speedRef.current
     addTimer(() => {
-      if (Math.random() < 0.25) {
-        // 紅燈:唔好撳
-        setP('red')
-        setHint('🔴 停!唔好撳')
-        addTimer(() => schedule(), 700)
+      const roll = Math.random()
+      if (roll < 0.2) {
+        goRed('🔴 停!唔好撳')
+      } else if (roll < 0.38) {
+        // 突襲:冇黃燈,直接綠燈
+        goGreen()
       } else {
-        // 先黃燈準備,再轉綠燈(教小朋友等綠燈先撳)
         setP('yellow')
-        setHint('🟡 準備…')
-        const yellowDur = 300 + Math.random() * 450
+        setHint('🟡 小心睇住…')
+        const yellowDur = 250 + Math.random() * 1300 // 長短好隨機
         addTimer(() => {
-          greenAtRef.current = performance.now()
-          setP('green')
-          setHint('🟢 撳!')
+          if (Math.random() < 0.35) {
+            // 奇兵:黃燈之後轉紅燈,唔係綠燈!
+            goRed('🔴 呃唔到你?唔好撳!')
+          } else {
+            goGreen()
+          }
         }, yellowDur)
       }
     }, wait)
@@ -187,7 +205,7 @@ export default function TrafficLight({ go }) {
       </button>
 
       <p className="mt-3 text-center text-lg text-sky-700">
-        只有綠燈 🟢 先至撳!黃燈 🟡 準備、紅燈 🔴 停,都唔好撳!
+        只有綠燈 🟢 先至撳!小心呀——黃燈 🟡 之後唔一定係綠燈㗎!
       </p>
     </div>
   )
