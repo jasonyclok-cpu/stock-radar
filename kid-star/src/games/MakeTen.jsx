@@ -10,17 +10,21 @@ const SECONDS = 60
 const SLOTS = 8
 
 // 湊十:撳兩個加埋等於 10 嘅數。免費,60 秒,按湊到幾多對賺星。
+// 板上 8 個數字全部唔重複:用 1-9 除咗 5(5 要另一個 5 先湊到,會重複),
+// 啱好 8 個數 4 對組合(1+9、2+8、3+7、4+6),個個數都有拍檔,冇死格。
+// 每次補位都重新洗位,等個板睇落唔同晒。
+const POOL = [1, 2, 3, 4, 6, 7, 8, 9]
+
 function fill(prev) {
   const tiles = prev ? [...prev] : []
-  while (tiles.length < SLOTS) tiles.push({ id: Math.random(), n: 1 + Math.floor(Math.random() * 9) })
-  // 確保至少有一對可以湊十
-  const ns = tiles.map((t) => t.n)
-  const ok = ns.some((n, i) => ns.slice(i + 1).includes(10 - n))
-  if (!ok && tiles.length) {
-    const i = Math.floor(Math.random() * tiles.length)
-    let j = Math.floor(Math.random() * tiles.length)
-    if (j === i) j = (j + 1) % tiles.length
-    tiles[j] = { id: Math.random(), n: 10 - tiles[i].n }
+  const used = new Set(tiles.map((t) => t.n))
+  POOL.forEach((n) => {
+    if (!used.has(n)) tiles.push({ id: Math.random(), n })
+  })
+  // 洗勻位置
+  for (let i = tiles.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[tiles[i], tiles[j]] = [tiles[j], tiles[i]]
   }
   return tiles
 }
