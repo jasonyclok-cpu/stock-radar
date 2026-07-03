@@ -17,7 +17,7 @@
 ## 完工必做（沒跑過驗證不得說「完成」）
 - root Python 改動：`python3 -m py_compile app.py analysis_engine.py`
 - kid-star 改動：`cd kid-star && npm ci && npm run build`
-- 題庫 JSON：`node -e "JSON.parse(require('fs').readFileSync('<路徑>','utf8'))"`；`.js` 資料檔：`node --check <路徑>`
+- 題庫 JSON：`node -e "JSON.parse(require('fs').readFileSync('<路徑>','utf8'));console.log('JSON OK')"`；`.js` 資料檔：`node --check <路徑>`
 - 一律 `claude/*` 分支＋PR，永遠不直接 push main，不代替用戶 merge。
 - 這是遠端 ephemeral 環境：沒 commit+push 的東西 session 結束就消失。每完成一個可驗證單位就 commit+push。
 

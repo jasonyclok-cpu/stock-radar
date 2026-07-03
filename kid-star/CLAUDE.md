@@ -11,7 +11,7 @@
 
 ## 驗證（改完必跑）
 1. `cd kid-star && npm ci && npm run build`
-2. 改了題庫 JSON：`node -e "JSON.parse(require('fs').readFileSync('src/data/questions/<檔>.json','utf8'))"`
+2. 改了題庫 JSON：`node -e "JSON.parse(require('fs').readFileSync('src/data/questions/<檔>.json','utf8'));console.log('JSON OK')"`
 3. 改了 `public/reading|shop` 的 `.js`：`node --check <路徑>`
 4. 新增題目：先 grep 題幹關鍵字確認不重複（歷史上出過重複題目的問題）。
 

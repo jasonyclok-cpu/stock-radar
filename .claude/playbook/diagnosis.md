@@ -38,7 +38,7 @@
 - **修法**——最低驗證命令（沒跑過不得聲稱完成；2026-07-03 均實測可用）：
   - root Python：`python3 -m py_compile app.py analysis_engine.py`（環境沒裝依賴時的底線；裝了依賴則再加 `python3 -c "import app"`）
   - kid-star：`cd kid-star && npm ci && npm run build`（Node 20+）
-  - 題庫 JSON：`node -e "JSON.parse(require('fs').readFileSync('<路徑>','utf8'))"`
+  - 題庫 JSON：`node -e "JSON.parse(require('fs').readFileSync('<路徑>','utf8'));console.log('JSON OK')"`（成功會印 JSON OK，無輸出＝沒跑成）
   - `.js` 資料檔（如 `public/reading/passages.js`）：`node --check <路徑>`
 
 ### 2. merge 到 main 即自動上線
