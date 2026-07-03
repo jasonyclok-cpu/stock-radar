@@ -33,7 +33,7 @@
 | 方向 | 內容 | 評估 |
 |------|------|------|
 | A. 短線訊號機 | 加更多技術指標、分鐘級數據、日內訊號 | ❌ 唔建議：免費數據唔支持、散戶短線勝率低、維護成本高 |
-| B. 深度基本面 | 財報拆解、DCF 估值、同業比較 | ⚠️ 有價值但免費數據質素差，工作量大 |
+| B. 深度基本面 | 財報拆解、DCF 估值、同業比較 | ⚠️ 深度版唔做；**篩選用基本面評分已納入設計（見 3.6）** |
 | **C. 三層漏斗雷達** | 大市環境 → 全市場篩選 → 個股深挖 | ✅ **推薦**：重用最多現有代碼、免費數據夠用、每日自動化 |
 
 **推薦方向 C**，理由：
@@ -97,6 +97,7 @@
 5. **成交量比 VOL_RATIO**：重用現有計法，異動放量加分
 
 **綜合分 = RS 百分位 × 0.35 + 板塊強度 × 0.2 + 技術分 × 0.25 + 52週位置 × 0.1 + 量比 × 0.1**
+（Phase 5 基本面上線後改用 3.6C 嘅新權重，加入 FUND_SCORE 0.15）
 
 輸出 Top 20 落 SQLite（`daily_ranks` 表），前端直接讀。
 
@@ -114,6 +115,9 @@
 │ ── 訊號 ──                      │
 │ BUY_SCORE 2/3 (MACD金叉+RSI回升)│
 │ 真實度 72/100 ✅放量 ⚠️未回踩   │
+│ ── 基本面 ──                    │
+│ FUND_SCORE 78 ✅增長 ⚠️估值偏貴 │
+│ 連續 4 季 beat｜營收 +38% YoY   │
 │ ── 事件 ──                      │
 │ ⚠️ 業績日 8/27（15 個交易日後） │
 │ ── 風險 ──                      │
@@ -194,7 +198,47 @@ VCP（Volatility Contraction Pattern，價格量能壓縮）係 Minervini 一派
 
 **限制要知**：型態偵測係模糊匹配，會有 false positive；VCP_SCORE 嘅定位係「幫你喺 550 隻入面搵返 5-10 隻值得人眼睇嘅」，唔係自動買入訊號。而且 VCP 只喺綠燈市況先有意思——Minervini 本人都話熊市唔玩突破。
 
-### 3.6 每日晨報（重用 Module I 通知）
+### 3.6 基本面評分 + 財報成績單 `fundamentals.py`
+
+> 定位澄清：第 2 節話「深度基本面（方向 B）唔做」指嘅係 DCF 估值、財報逐行拆解嗰種研究員工作。呢度做嘅係**篩選用基本面**——用一個分數答一條問題：「呢隻技術面靚嘅股，基本面撐唔撐得住？」技術面搵時機，基本面驗質地，即係 CANSLIM 嘅玩法，同 VCP 模組天然配套。
+
+**A. FUND_SCORE（0-100）：四大支柱**
+
+| 支柱 | 權重 | 指標（全部 yfinance 免費攞到） | 邏輯 |
+|------|------|------------------------------|------|
+| 增長 | 35% | 最新季營收 YoY、EPS YoY；**增長加速度**（最新季 YoY vs 上季 YoY）；連續 beat 預期次數（`earnings_dates` 有 estimate vs actual） | 強勢股背後通常係盈利加速；增長「加速」比「高」更重要 |
+| 質素 | 30% | ROE、毛利率水平 + 3 年趨勢、FCF margin（Module A 已計 FCF）、經營現金流 > 淨利潤（盈利質素） | 賺唔賺到真錢 |
+| 健康 | 20% | Debt/Equity、流動比率、利息覆蓋倍數、股數變化（有冇狂增發攤薄） | 唔好買到爆煲貨 |
+| 估值 | 15% | Forward PE vs 所屬板塊中位數、PEG、P/FCF | 注意：喺動量策略入面估值係 sanity check（防止買到離譜泡沫），唔係揀平貨——平貨通常平得有道理 |
+
+計分方式：每項指標喺 universe 內排百分位再加權。**缺數唔懲罰**——yfinance 基本面數據成日有窿（尤其細股、金融股），缺邊項就按可用支柱重新歸一，分析卡標明「基於 N/12 項指標」。
+
+**B. 財報成績單（分析卡「基本面」區展開後嘅明細）**
+
+- 最近 8 季營收 + EPS 走勢（`quarterly_income_stmt`），YoY 增長率逐季列出，一眼睇到加速定減速
+- Earnings surprise 記錄：最近 4-8 次 beat/miss + surprise %（`earnings_dates`）
+- 毛利率／營業利潤率／淨利率 3 年趨勢（擴張定收縮）
+- FCF 逐年走勢
+- 下次業績日 + 距離（同 3.3 事件風險共用）
+
+**C. 同其他模組嘅整合規則**
+
+1. 第二層綜合分加入基本面：**RS 0.30 + 板塊 0.15 + 技術分 0.20 + 52週位置 0.10 + 量比 0.10 + FUND_SCORE 0.15**（Phase 5 上線前用原權重）
+2. **雙強標記**：VCP_SCORE ≥ 60 兼 FUND_SCORE ≥ 60 → 排行榜標 ⭐「型態+質地雙強」，晨報優先列出——呢類就係 Minervini/CANSLIM 講嘅超級強勢股候選
+3. FUND_SCORE < 40 嘅股，就算技術訊號幾靚，分析卡都會警示「基本面弱，只宜短打」
+4. 業績日翌日強制刷新該股基本面（beat/miss 即時反映落分數）
+
+**D. 數據工程**
+
+- 基本面數據唔係日日變：SQLite 加 `fundamentals` cache 表，**每週日全量更新一次** + 業績日翌日單股強制更新，唔好每日拉 550 隻嘅財報（會被 yfinance rate limit）
+- `earnings_dates`、`quarterly_income_stmt` 呢啲 call 比價格 call 慢好多，全量更新排喺週末跑
+
+**E. 老實限制**
+
+- yfinance 財報數據有錯漏同延遲，關鍵決策前應該去 SEC filings／公司 IR 覆核，分析卡會加返免責提示
+- 冇 forward guidance 數據（免費源冇），所以「管理層展望」呢一環系統做唔到，要自己聽 earnings call
+
+### 3.7 每日晨報（重用 Module I 通知）
 
 排程改成美股節奏（而家 cron 係 16:05 本地時間，要改）：
 - **收市後掃描**：美東 16:30 = 香港早上 04:30（夏令）→ 排 HK 時間 07:00 跑，你起身啱啱好收到
@@ -216,6 +260,7 @@ VCP（Volatility Contraction Pattern，價格量能壓縮）係 Minervini 一派
 | `/api/earnings` | GET | watchlist 未來 14 日業績日曆 |
 | `/api/sectors` | GET | 11 板塊 ETF 動量排名 |
 | `/api/vcp` | GET | 全市場 VCP 候選（VCP_SCORE 排序 + pivot 距離） |
+| `/api/fundamentals/{symbol}` | GET | FUND_SCORE 四支柱明細 + 財報成績單（8 季營收/EPS、surprise 記錄、利潤率趨勢） |
 | 現有 endpoints | — | 全部保留不變 |
 
 前端（`static/index.html`）加三個 tab：**市況**（燈號儀表板）、**排行**（Top 20 卡片列表）、**個股**（現有搜尋 + 新分析卡）。
@@ -232,7 +277,9 @@ SQLite (output/cache.db 擴展)
 ├── universe      (symbol, name, sector)  ← 每週更新
 ├── daily_ranks   (date, symbol, rs_pct, score, ...) ← 每日寫入
 ├── regime        (date, light, spy_trend, vix, breadth, momentum)
-└── earnings      (symbol, next_date, checked_at)
+├── earnings      (symbol, next_date, checked_at)
+└── fundamentals  (symbol, updated_at, fund_score, growth/quality/health/valuation 分項,
+                   quarterly 營收+EPS JSON, surprise 記錄 JSON)  ← 每週更新 + 業績翌日單股刷新
 ```
 
 API 讀 DB 為主，`fetch_price_data` 加一層「先查 cache、缺先拉網」。咁樣前端秒開，而且累積咗歷史排名數據，將來訓練 LightGBM（Module G）就有現成 dataset。
@@ -269,9 +316,17 @@ API 讀 DB 為主，`fetch_price_data` 加一層「先查 cache、缺先拉網�
 - `/api/vcp` + 晨報「接近突破位」提示 + 分析卡型態縮圖
 - 回測驗證：VCP 候選 + RALLY_QUALITY 確認 vs 淨 BUY_SCORE，睇勝率差幾多
 
+### Phase 5：基本面評分 + 財報成績單（~1-2 個 session）
+- `fundamentals.py`：FUND_SCORE 四支柱（增長／質素／健康／估值），universe 百分位計分
+- `fundamentals` SQLite cache + 週日全量更新排程 + 業績翌日單股刷新
+- `/api/fundamentals/{symbol}` + 分析卡基本面區 + 財報成績單明細
+- 綜合分改用新權重（FUND_SCORE 0.15）、⭐雙強標記（VCP + 基本面）
+- 可以提前：如果想快啲見效，可以先做「淨 watchlist 版」（得幾十隻股，唔使等 Phase 2 嘅 universe cache），全市場版先要排後
+
 ### 之後（有數據先做）
 - Phase 2 跑滿 3 個月後，用累積嘅 `daily_ranks` + 未來回報訓練 LightGBM，激活 Module G
 - 自選 watchlist CRUD（而家 hardcode 喺 `WATCHLIST`）
+- FUND_SCORE 四支柱權重（35/30/20/15）都可以用累積數據做敏感度測試
 
 ---
 
