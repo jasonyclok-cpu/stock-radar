@@ -83,6 +83,46 @@
     }
     .search-row button:active { opacity: 0.7; }
 
+    /* ── Regime Card (市場溫度計) ── */
+    .regime-wrap { padding: 0 16px 10px; }
+    .regime-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+      -webkit-user-select: none;
+    }
+    .regime-card:active { background: var(--card2); }
+    .regime-card.green  { border-left: 3px solid var(--green); }
+    .regime-card.yellow { border-left: 3px solid var(--yellow); }
+    .regime-card.red    { border-left: 3px solid var(--red); }
+    .regime-head {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .regime-light { font-size: 15px; font-weight: 700; }
+    .regime-advice { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .regime-chips {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;
+    }
+    .rchip {
+      font-size: 11px; font-weight: 600;
+      border-radius: 6px; padding: 3px 8px;
+      background: var(--card2); border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .rchip.ok  { color: var(--green); border-color: rgba(63,185,80,.4); }
+    .rchip.bad { color: var(--red);   border-color: rgba(248,81,73,.4); }
+    .regime-detail {
+      display: none;
+      margin-top: 10px; padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 12px; color: var(--muted);
+      line-height: 1.7;
+    }
+    .regime-detail.visible { display: block; }
+    .regime-state { color: var(--text); }
+
     /* ── Tabs ── */
     .tabs {
       display: flex; gap: 6px;
@@ -243,6 +283,13 @@
   </div>
 </div>
 
+<!-- Market Regime (市場溫度計) -->
+<div class="regime-wrap">
+  <div class="regime-card" id="regime-card" onclick="toggleRegimeDetail()">
+    <div class="loading" style="padding:8px">載入市況...</div>
+  </div>
+</div>
+
 <!-- Tabs -->
 <div class="tabs">
   <div class="tab active" id="tab-scan-btn"    onclick="switchTab('scan',    this)">掃描</div>
@@ -313,6 +360,61 @@ function setError(id, msg) {
 function updateTime() {
   document.getElementById("last-update").textContent =
     new Date().toLocaleTimeString("zh-Hant", { hour: "2-digit", minute: "2-digit" });
+}
+
+// ── Market Regime (市場溫度計) ────────────
+const RALLY_CHECK_LABELS = {
+  breadth_confirms: "市寬跟升",
+  equal_weight_participates: "等權參與",
+  volume_supports: "量能配合",
+  above_ma200: "MA200之上",
+};
+
+async function loadRegime() {
+  const el = document.getElementById("regime-card");
+  try {
+    const r = await fetchJSON("/api/regime");
+    const ind = r.indicators || {};
+    const chips = [
+      ["趨勢", ind.trend], ["VIX", ind.vix],
+      ["市寬", ind.breadth], ["動量", ind.momentum],
+    ].map(([label, d]) =>
+      `<span class="rchip ${d && d.healthy ? "ok" : "bad"}">${d && d.healthy ? "✓" : "✗"} ${label}</span>`
+    ).join("");
+
+    const rally = r.rally_check || {};
+    const rallyRows = rally.is_rising
+      ? Object.entries(rally.checks || {}).map(([k, ok]) =>
+          `${ok ? "✅" : "❌"} ${RALLY_CHECK_LABELS[k] || k}`).join("&nbsp;&nbsp;")
+      : "指數非上升中，唔適用";
+
+    el.className = `regime-card ${r.light.toLowerCase()}`;
+    el.innerHTML = `
+      <div class="regime-head">
+        <div>
+          <div class="regime-light">${r.emoji} ${r.light_name}（${r.score}/4 健康）</div>
+          <div class="regime-advice">${r.advice}${r.capped_by_rally_quality ? "・⚠️ 升勢質素唔過關已降級" : ""}</div>
+        </div>
+        <span class="badge blue">${r.date}</span>
+      </div>
+      <div class="regime-chips">${chips}</div>
+      <div class="regime-detail" id="regime-detail">
+        <div class="regime-state">${r.state_text || ""}</div>
+        <div style="margin-top:6px">・${(ind.trend||{}).text || ""}<br>
+        ・${(ind.vix||{}).text || ""}<br>
+        ・${(ind.breadth||{}).text || ""}<br>
+        ・${(ind.momentum||{}).text || ""}</div>
+        <div style="margin-top:6px">升勢質素：${rallyRows}</div>
+      </div>`;
+  } catch (e) {
+    el.className = "regime-card";
+    el.innerHTML = `<div class="empty" style="padding:8px">⚠️ 市況載入失敗：${e.message}</div>`;
+  }
+}
+
+function toggleRegimeDetail() {
+  const d = document.getElementById("regime-detail");
+  if (d) d.classList.toggle("visible");
 }
 
 // ── Scan ──────────────────────────────────
@@ -493,6 +595,7 @@ function switchTab(tab, el) {
 
 // ── Init ──────────────────────────────────
 loadedTabs.add("scan");
+loadRegime();
 loadScan();
 </script>
 </body>

@@ -880,11 +880,35 @@ def daily_scan_and_alert():
     print(f"  Daily scan started: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"{'='*60}")
     notifier = SignalNotifier(get_notify_config())
+
+    # 晨報第一部分：市場溫度計燈號（無論有冇個股訊號都發）
+    # lazy import：market_regime 反過嚟 import 本模組嘅 fetch_price_data
+    regime_msg = ""
+    try:
+        from market_regime import get_market_regime, format_regime_message
+        regime = get_market_regime(str(OUTPUT_DIR / "cache.db"), refresh=True)
+        regime_msg = format_regime_message(regime)
+    except Exception as e:
+        regime_msg = f"🌡️ 市場溫度計計算失敗：{e}"
+        print(f"[ERROR] market regime: {e}")
+
     all_symbols = [s for syms in WATCHLIST.values() for s in syms]
     screened = scan_watchlist(all_symbols, period="6mo", min_buy_score=2)
+
     if screened.empty:
         print("[INFO] No strong signals today")
+        morning = regime_msg + "\n\n📭 今日 watchlist 無強訊號"
+        notifier.send_telegram(morning)
+        notifier.send_email(subject="[晨報] 市場溫度計", body=morning)
         return
+
+    signal_lines = [
+        f"{row['Symbol']}: Buy {row['BUY_SCORE']}/3 | RSI {row['RSI14']}"
+        for _, row in screened.iterrows()
+    ]
+    morning = regime_msg + "\n\n📡 今日強訊號：\n" + "\n".join(signal_lines)
+    notifier.send_telegram(morning)
+    notifier.send_email(subject="[晨報] 市場溫度計 + 強訊號", body=morning)
 
     for _, row in screened.iterrows():
         symbol = row["Symbol"]

@@ -34,6 +34,7 @@ from analysis_engine import (
     daily_scan_and_alert,
     WATCHLIST,
 )
+from market_regime import get_market_regime
 
 # ── App setup ────────────────────────────
 app = FastAPI(title="Stock Analysis API", version="1.0.0")
@@ -96,6 +97,18 @@ async def serve_pwa():
 @app.get("/api/health")
 async def health():
     return {"status": "ok", "timestamp": pd.Timestamp.now().isoformat()}
+
+
+# ── Market regime (市場溫度計) ────────────
+@app.get("/api/regime")
+async def api_regime(refresh: bool = False):
+    try:
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(
+            None, lambda: get_market_regime(DB_PATH, refresh=refresh)
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ── Single stock analysis ─────────────────
@@ -295,7 +308,10 @@ async def api_watchlist():
 scheduler = AsyncIOScheduler()
 
 
-@scheduler.scheduled_job("cron", hour=16, minute=5, day_of_week="mon-fri")
+# 美股收市 = 美東 16:00 = 香港凌晨 04:00/05:00（夏/冬令）
+# 香港 07:00 週二至六跑，起身啱啱好收到晨報
+@scheduler.scheduled_job("cron", hour=7, minute=0, day_of_week="tue-sat",
+                         timezone="Asia/Hong_Kong")
 async def scheduled_scan():
     loop = asyncio.get_event_loop()
     await loop.run_in_executor(None, daily_scan_and_alert)
@@ -304,4 +320,4 @@ async def scheduled_scan():
 @app.on_event("startup")
 async def startup():
     scheduler.start()
-    print("[APScheduler] Started - daily scan at 16:05 Mon-Fri")
+    print("[APScheduler] Started - morning report at 07:00 HKT Tue-Sat")

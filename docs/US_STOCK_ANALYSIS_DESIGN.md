@@ -310,7 +310,7 @@ API 讀 DB 為主，`fetch_price_data` 加一層「先查 cache、缺先拉網�
 
 ## 6. 實施計劃（三個 Phase，每個獨立可用）
 
-### Phase 1：市場溫度計 + 排程改時區（~1 個 session）
+### Phase 1：市場溫度計 + 排程改時區 ✅ 已實施（market_regime.py）
 - `market_regime.py`（SPY/QQQ/VIX/市寬四指標 → 燈號）
 - 大市層面真假升市檢查（3.4A：市寬確認 + RSP 等權背馳 + 量能）併入燈號
 - `/api/regime` + 前端市況卡
