@@ -19,6 +19,8 @@ export const LEVELS = {
     小一: [
       { id: 1, name: '星期月曆', emoji: '📅', topics: ['星期和月曆'] },
       { id: 2, name: '圖形樂園', emoji: '🔺', topics: ['平面圖形'] },
+      { id: 3, name: '加減小屋', emoji: '➕', topics: ['20以內加減'] },
+      { id: 4, name: '星星挑戰', emoji: '🌟', topics: ['星期和月曆', '平面圖形', '20以內加減'] },
     ],
     小二: [
       { id: 1, name: '加法小路', emoji: '➕', topics: ['兩位數加法'] },
@@ -44,6 +46,8 @@ export const LEVELS = {
     小一: [
       { id: 1, name: '人稱代詞', emoji: '🙋', topics: ['人稱代詞'] },
       { id: 2, name: '專名號', emoji: '📍', topics: ['專名號'] },
+      { id: 3, name: '筆畫小徑', emoji: '✏️', topics: ['筆畫'] },
+      { id: 4, name: '星星挑戰', emoji: '🌟', topics: ['人稱代詞', '專名號', '筆畫'] },
     ],
     小二: [
       { id: 1, name: '量詞樂園', emoji: '🐶', topics: ['量詞'] },
@@ -66,6 +70,8 @@ export const LEVELS = {
     小一: [
       { id: 1, name: '顏色數字', emoji: '🌈', topics: ['顏色數字'] },
       { id: 2, name: 'this / that', emoji: '👉', topics: ['this/that'] },
+      { id: 3, name: '動物樂園', emoji: '🦁', topics: ['動物英文'] },
+      { id: 4, name: '星星挑戰', emoji: '🌟', topics: ['顏色數字', 'this/that', '動物英文'] },
     ],
     小二: [
       { id: 1, name: '拼字海灘', emoji: '🏖️', topics: ['拼寫'] },

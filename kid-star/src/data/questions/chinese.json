@@ -1444,5 +1444,359 @@
     "question": "妹妹又靚 __ 乖。",
     "answer": "又",
     "explanation": "「又…又…」用嚟講兩個一齊有嘅優點:又靚又乖。"
+  },
+  {
+    "id": "chi-match-008",
+    "subject": "chinese",
+    "topic": "詞語配對",
+    "difficulty": 1,
+    "type": "matching",
+    "question": "把意思相反的詞語配對",
+    "pairs": [
+      { "left": "快", "right": "慢" },
+      { "left": "冷", "right": "熱" },
+      { "left": "哭", "right": "笑" }
+    ],
+    "answer": "快↔慢、冷↔熱、哭↔笑",
+    "explanation": "呢啲係反義詞:快嘅相反係慢,冷嘅相反係熱,哭嘅相反係笑。"
+  },
+  {
+    "id": "chi-match-009",
+    "subject": "chinese",
+    "topic": "詞語配對",
+    "difficulty": 1,
+    "type": "matching",
+    "question": "把意思相反的詞語配對",
+    "pairs": [
+      { "left": "開", "right": "關" },
+      { "left": "早", "right": "晚" },
+      { "left": "長", "right": "短" }
+    ],
+    "answer": "開↔關、早↔晚、長↔短",
+    "explanation": "呢啲係反義詞:開對關,早對晚,長對短。"
+  },
+  {
+    "id": "chi-match-010",
+    "subject": "chinese",
+    "topic": "詞語配對",
+    "difficulty": 2,
+    "type": "matching",
+    "question": "把意思相近的詞語配對",
+    "pairs": [
+      { "left": "高興", "right": "快樂" },
+      { "left": "明亮", "right": "光亮" },
+      { "left": "美味", "right": "可口" }
+    ],
+    "answer": "高興↔快樂、明亮↔光亮、美味↔可口",
+    "explanation": "呢啲係近義詞:高興即係快樂,明亮即係光亮,美味即係可口(好食)。"
+  },
+  {
+    "id": "chi-match-011",
+    "subject": "chinese",
+    "topic": "詞語配對",
+    "difficulty": 2,
+    "type": "matching",
+    "question": "把意思相反的詞語配對",
+    "pairs": [
+      { "left": "輕", "right": "重" },
+      { "left": "高", "right": "低" },
+      { "left": "遠", "right": "近" }
+    ],
+    "answer": "輕↔重、高↔低、遠↔近",
+    "explanation": "呢啲係反義詞:輕對重,高對低,遠對近。"
+  },
+  {
+    "id": "chi-match-012",
+    "subject": "chinese",
+    "topic": "詞語配對",
+    "difficulty": 3,
+    "type": "matching",
+    "question": "把意思相近的詞語配對",
+    "pairs": [
+      { "left": "寒冷", "right": "冰冷" },
+      { "left": "炎熱", "right": "酷熱" },
+      { "left": "溫暖", "right": "和暖" }
+    ],
+    "answer": "寒冷↔冰冷、炎熱↔酷熱、溫暖↔和暖",
+    "explanation": "呢啲係近義詞:寒冷即係冰冷(好凍),炎熱即係酷熱(好熱),溫暖即係和暖。"
+  },
+  {
+    "id": "chi-re-010",
+    "subject": "chinese",
+    "topic": "重組句子",
+    "difficulty": 1,
+    "type": "reorder",
+    "question": "重組句子",
+    "words": ["我們", "在", "課室", "讀書", "。"],
+    "answer": "我們在課室讀書。",
+    "explanation": "「在課室」講喺邊度,放喺「讀書」之前:我們 → 在課室 → 讀書。"
+  },
+  {
+    "id": "chi-re-011",
+    "subject": "chinese",
+    "topic": "重組句子",
+    "difficulty": 2,
+    "type": "reorder",
+    "question": "重組句子",
+    "words": ["爸爸", "買了", "一份", "報紙", "。"],
+    "answer": "爸爸買了一份報紙。",
+    "explanation": "「爸爸買了」之後,講買咗乜:「一份報紙」。量詞「一份」放喺「報紙」前面。"
+  },
+  {
+    "id": "chi-re-012",
+    "subject": "chinese",
+    "topic": "重組句子",
+    "difficulty": 2,
+    "type": "reorder",
+    "question": "重組句子",
+    "words": ["天上", "有", "很多", "星星", "。"],
+    "answer": "天上有很多星星。",
+    "explanation": "先講邊度(天上),再講有乜嘢(很多星星)。"
+  },
+  {
+    "id": "chi-re-013",
+    "subject": "chinese",
+    "topic": "重組句子",
+    "difficulty": 2,
+    "type": "reorder",
+    "question": "重組句子",
+    "words": ["我", "幫", "媽媽", "洗碗", "。"],
+    "answer": "我幫媽媽洗碗。",
+    "explanation": "「我」係主角,「幫媽媽」講幫邊個,「洗碗」講做乜嘢。"
+  },
+  {
+    "id": "chi-re-014",
+    "subject": "chinese",
+    "topic": "重組句子",
+    "difficulty": 3,
+    "type": "reorder",
+    "question": "重組句子",
+    "words": ["小狗", "在", "草地上", "跑來跑去", "。"],
+    "answer": "小狗在草地上跑來跑去。",
+    "explanation": "「在草地上」講喺邊度,放喺「跑來跑去」之前。"
+  },
+  {
+    "id": "c3-fig-007",
+    "subject": "chinese",
+    "topic": "修辭(比喻)",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "「星星像鑽石一樣閃亮。」把星星比喻成咩?",
+    "options": ["鑽石", "月亮", "燈", "眼睛"],
+    "answer": "鑽石",
+    "explanation": "用「像鑽石」嚟形容星星好閃,把星星比喻成鑽石。"
+  },
+  {
+    "id": "c3-fig-008",
+    "subject": "chinese",
+    "topic": "修辭(比喻)",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "「爸爸高大得像一座山。」把爸爸比喻成咩?",
+    "options": ["一座山", "一棵樹", "一幢樓", "一隻熊"],
+    "answer": "一座山",
+    "explanation": "用「像一座山」形容爸爸又高又大,把爸爸比喻成山。"
+  },
+  {
+    "id": "c3-fig-009",
+    "subject": "chinese",
+    "topic": "修辭(比喻)",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "邊一句係比喻句?",
+    "options": ["妹妹的手冷得像冰。", "妹妹的手很冷。", "妹妹凍到震。", "今日好凍。"],
+    "answer": "妹妹的手冷得像冰。",
+    "explanation": "有「像冰」,把凍嘅手比喻成冰,所以係比喻句;其他只係直接形容。"
+  },
+  {
+    "id": "c3-fig-010",
+    "subject": "chinese",
+    "topic": "修辭(比喻)",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "「時間像流水,一去不回頭。」把時間比喻成咩?",
+    "options": ["流水", "風", "雲", "小鳥"],
+    "answer": "流水",
+    "explanation": "用「像流水」形容時間過得快、返唔到轉頭,把時間比喻成流水。"
+  },
+  {
+    "id": "c1-pron-007",
+    "subject": "chinese",
+    "topic": "人稱代詞",
+    "difficulty": 2,
+    "type": "fill_blank",
+    "inputMode": "choices",
+    "choices": ["你們", "我", "他", "它"],
+    "question": "老師對同學們說:「__ 要準時交功課。」",
+    "answer": "你們",
+    "explanation": "老師對住成班同學講,係「你們」(多過一個人)。"
+  },
+  {
+    "id": "c1-pron-008",
+    "subject": "chinese",
+    "topic": "人稱代詞",
+    "difficulty": 2,
+    "type": "fill_blank",
+    "inputMode": "choices",
+    "choices": ["她", "他", "它", "你"],
+    "question": "媽媽很疼我,__ 每天都為我煮飯。",
+    "answer": "她",
+    "explanation": "講女性(媽媽),用「她」(女字邊)。"
+  },
+  {
+    "id": "c1-pron-009",
+    "subject": "chinese",
+    "topic": "人稱代詞",
+    "difficulty": 3,
+    "type": "fill_blank",
+    "inputMode": "choices",
+    "choices": ["它", "他", "她", "牠"],
+    "question": "這個蘋果很甜,__ 是我最愛的水果。",
+    "answer": "它",
+    "explanation": "講死物(蘋果),用「它」。動物先用「牠」,人先用「他/她」。"
+  },
+  {
+    "id": "c1-pron-010",
+    "subject": "chinese",
+    "topic": "人稱代詞",
+    "difficulty": 3,
+    "type": "fill_blank",
+    "inputMode": "choices",
+    "choices": ["他們", "它", "她", "你"],
+    "question": "哥哥和弟弟去踢波,__ 玩得很開心。",
+    "answer": "他們",
+    "explanation": "講兩個男仔(哥哥同弟弟),用「他們」。"
+  },
+  {
+    "id": "c1-name-007",
+    "subject": "chinese",
+    "topic": "專名號",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "下面邊個詞係地名,要加專名號?",
+    "options": ["日本", "蛋糕", "跑步", "開心"],
+    "answer": "日本",
+    "explanation": "「日本」係國家名,屬於專有名詞,要加專名號。"
+  },
+  {
+    "id": "c1-name-008",
+    "subject": "chinese",
+    "topic": "專名號",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "邊個係地方名,要加專名號?",
+    "options": ["太平山", "山頂", "山路", "爬山"],
+    "answer": "太平山",
+    "explanation": "「太平山」係一個特定地方嘅名,要加專名號;「山頂、山路」係普通名詞。"
+  },
+  {
+    "id": "c1-name-009",
+    "subject": "chinese",
+    "topic": "專名號",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "邊個係人名,要加專名號?",
+    "options": ["李小龍", "哥哥", "醫生", "司機"],
+    "answer": "李小龍",
+    "explanation": "「李小龍」係一個人嘅名字,要加專名號;「哥哥、醫生」係稱呼,唔使。"
+  },
+  {
+    "id": "c1-name-010",
+    "subject": "chinese",
+    "topic": "專名號",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "下面邊個詞唔使加專名號?",
+    "options": ["火車站", "九龍", "上海", "陳小明"],
+    "answer": "火車站",
+    "explanation": "「火車站」係普通名詞;「九龍、上海、陳小明」係專有名,要加專名號。"
+  },
+  {
+    "id": "c1-stroke-001",
+    "subject": "chinese",
+    "topic": "筆畫",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "「口」字有幾多筆畫?",
+    "options": ["3 畫", "2 畫", "4 畫", "5 畫"],
+    "answer": "3 畫",
+    "explanation": "「口」字寫 3 筆:豎、橫折、橫。"
+  },
+  {
+    "id": "c1-stroke-002",
+    "subject": "chinese",
+    "topic": "筆畫",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "「人」字有幾多筆畫?",
+    "options": ["2 畫", "3 畫", "1 畫", "4 畫"],
+    "answer": "2 畫",
+    "explanation": "「人」字寫 2 筆:撇、捺。"
+  },
+  {
+    "id": "c1-stroke-003",
+    "subject": "chinese",
+    "topic": "筆畫",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "「山」字有幾多筆畫?",
+    "options": ["3 畫", "2 畫", "4 畫", "5 畫"],
+    "answer": "3 畫",
+    "explanation": "「山」字寫 3 筆:中間豎、豎折、右邊豎。"
+  },
+  {
+    "id": "c1-stroke-004",
+    "subject": "chinese",
+    "topic": "筆畫",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "「日」字有幾多筆畫?",
+    "options": ["4 畫", "3 畫", "5 畫", "6 畫"],
+    "answer": "4 畫",
+    "explanation": "「日」字寫 4 筆:豎、橫折、橫、橫。"
+  },
+  {
+    "id": "c1-stroke-005",
+    "subject": "chinese",
+    "topic": "筆畫",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "「木」字有幾多筆畫?",
+    "options": ["4 畫", "3 畫", "5 畫", "6 畫"],
+    "answer": "4 畫",
+    "explanation": "「木」字寫 4 筆:橫、豎、撇、捺。"
+  },
+  {
+    "id": "c1-stroke-006",
+    "subject": "chinese",
+    "topic": "筆畫",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "「大」字有幾多筆畫?",
+    "options": ["3 畫", "2 畫", "4 畫", "5 畫"],
+    "answer": "3 畫",
+    "explanation": "「大」字寫 3 筆:橫、撇、捺。"
+  },
+  {
+    "id": "c1-stroke-007",
+    "subject": "chinese",
+    "topic": "筆畫",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "「田」字有幾多筆畫?",
+    "options": ["5 畫", "4 畫", "6 畫", "7 畫"],
+    "answer": "5 畫",
+    "explanation": "「田」字寫 5 筆:豎、橫折、橫、豎、橫。"
+  },
+  {
+    "id": "c1-stroke-008",
+    "subject": "chinese",
+    "topic": "筆畫",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "邊個字嘅筆畫最少?",
+    "options": ["人", "口", "日", "田"],
+    "answer": "人",
+    "explanation": "「人」得 2 畫,「口」3 畫、「日」4 畫、「田」5 畫,所以「人」最少。"
   }
 ]
