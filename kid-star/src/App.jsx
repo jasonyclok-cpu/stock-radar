@@ -15,6 +15,7 @@ import ArcadeQuiz from './games/ArcadeQuiz'
 import TrueFalse from './games/TrueFalse'
 import MakeTen from './games/MakeTen'
 import Dictation from './games/Dictation'
+import StoryTheater from './games/StoryTheater'
 import { findGame } from './games/registry'
 import { recordPlay } from './lib/playlimit'
 import { getWrongPool } from './lib/quizEngine'
@@ -34,6 +35,7 @@ const SPECIFIC = {
   spot: SpotDifference,
   maze: Maze,
   dictation: Dictation,
+  story: StoryTheater,
 }
 
 // 免費遊戲嘅次數追蹤:開始咗 8 秒先算「玩咗一次」,誤撳即退唔會嘥額
