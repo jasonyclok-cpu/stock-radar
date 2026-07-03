@@ -247,6 +247,26 @@ VCP（Volatility Contraction Pattern，價格量能壓縮）係 Minervini 一派
   2. Top 10 排名（升跌、綜合分、訊號）
   3. 持倉股（自選 watchlist）有冇沽出／止蝕訊號
   4. 未來 7 日 watchlist 業績日曆
+  5. 異動股 + 相關新聞標題（見 3.8）
+
+### 3.8 新聞層（設計決定：只做「脈絡展示」，唔做「情緒訊號」）
+
+新聞分析有三種做法，逐個判斷：
+
+**❌ 做法一：新聞情緒做訊號因子**（sentiment score 入綜合分）——唔做，理由：
+1. **價量已經係新聞嘅結果**：重大新聞出街幾秒內已反映喺價格同成交量，系統本身就係讀價量嘅——用免費源慢半拍咁抽新聞再計情緒分，係用一個滯後、嘈吵嘅訊號去覆述一個你已經有嘅乾淨訊號
+2. **冇辦法回測**：免費源冇歷史新聞 archive，情緒因子加咗入綜合分都無從驗證，違反成個系統「所有因子要可以回測」嘅原則（第 7.4 條）
+3. 免費新聞數據覆蓋差、重複多、標題黨多，keyword/情緒模型喺財經文本錯判率高
+
+**✅ 做法二：異動偵測 + 新聞脈絡**——做，因為佢答嘅係另一條問題。唔係「新聞話買唔買」，而係「**價量異動咗，發生咗咩事？**」：
+- **異動偵測用價量做**（呢個先係可靠訊號）：watchlist／持倉股單日 gap ≥ 2×ATR，或者量比 ≥ 3
+- 偵測到異動先去拉新聞：`yf.Ticker(sym).news`（免費，最近 ~10 條標題 + 連結）
+- 輸出：晨報異動股附 2-3 條相關標題連結；分析卡加「最近新聞」區（純展示，唔入分）
+- 業績日翌日自動附帶財報相關報道連結，配合 3.6 嘅 beat/miss 數據
+
+**⏸ 做法三：LLM 深度解讀**（earnings call transcript、8-K、新聞摘要）——後話。有真價值（尤其係幫你消化業績電話會），但要 Claude API key、有成本、要防 prompt injection（新聞內容係不可信輸入），等 Phase 1-5 行穩咗先考慮做一個獨立嘅「財報週報」功能。
+
+SQLite 加一張 `news_cache (symbol, fetched_at, headlines JSON)`，異動先拉、拉完 cache 24 小時，唔好日日掃 550 隻嘅新聞。
 
 ---
 
@@ -261,6 +281,7 @@ VCP（Volatility Contraction Pattern，價格量能壓縮）係 Minervini 一派
 | `/api/sectors` | GET | 11 板塊 ETF 動量排名 |
 | `/api/vcp` | GET | 全市場 VCP 候選（VCP_SCORE 排序 + pivot 距離） |
 | `/api/fundamentals/{symbol}` | GET | FUND_SCORE 四支柱明細 + 財報成績單（8 季營收/EPS、surprise 記錄、利潤率趨勢） |
+| `/api/movers` | GET | 異動股（gap ≥ 2×ATR 或量比 ≥ 3）+ 相關新聞標題 |
 | 現有 endpoints | — | 全部保留不變 |
 
 前端（`static/index.html`）加三個 tab：**市況**（燈號儀表板）、**排行**（Top 20 卡片列表）、**個股**（現有搜尋 + 新分析卡）。
@@ -278,8 +299,9 @@ SQLite (output/cache.db 擴展)
 ├── daily_ranks   (date, symbol, rs_pct, score, ...) ← 每日寫入
 ├── regime        (date, light, spy_trend, vix, breadth, momentum)
 ├── earnings      (symbol, next_date, checked_at)
-└── fundamentals  (symbol, updated_at, fund_score, growth/quality/health/valuation 分項,
+├── fundamentals  (symbol, updated_at, fund_score, growth/quality/health/valuation 分項,
                    quarterly 營收+EPS JSON, surprise 記錄 JSON)  ← 每週更新 + 業績翌日單股刷新
+└── news_cache    (symbol, fetched_at, headlines JSON)  ← 異動先拉，cache 24 小時
 ```
 
 API 讀 DB 為主，`fetch_price_data` 加一層「先查 cache、缺先拉網」。咁樣前端秒開，而且累積咗歷史排名數據，將來訓練 LightGBM（Module G）就有現成 dataset。
@@ -304,11 +326,12 @@ API 讀 DB 為主，`fetch_price_data` 加一層「先查 cache、缺先拉網�
 - 個股真假突破過濾（3.4B）→ `RALLY_QUALITY` 分入排名同訊號降級
 - `/api/rank`、`/api/sectors` + 前端排行 tab
 
-### Phase 3：分析卡 + 業績日曆（~1 個 session）
+### Phase 3：分析卡 + 業績日曆 + 異動新聞（~1 個 session）
 - 業績日抓取 + 事件風險降級
 - `/api/card/{symbol}` 整合回測/Kelly/MC + 真實度明細
+- 異動偵測（gap/量比）+ `yf.Ticker.news` 標題展示（3.8）、`/api/movers`
 - 回測加 `COMBINED_FILTERED` 策略，驗證真假升勢過濾器有冇真係提升勝率
-- 前端分析卡 UI + 晨報加業績提示
+- 前端分析卡 UI + 晨報加業績提示、異動新聞
 
 ### Phase 4：VCP 型態掃描器（~1-2 個 session，需要 Phase 2 嘅價格 cache）
 - swing high/low 偵測 + 收縮序列匹配
