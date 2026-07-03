@@ -11,7 +11,9 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // prompt 模式:有新版本先彈「撳一下更新」掣(UpdateToast),唔會靜靜哋換版
+      registerType: 'prompt',
+      injectRegister: null,
       includeAssets: ['icons/apple-touch-icon.png'],
       manifest: {
         name: '星星學園',

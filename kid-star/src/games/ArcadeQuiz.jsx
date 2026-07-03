@@ -6,6 +6,7 @@ import { getArcadePool, optionsOf, shuffle } from '../lib/quizEngine'
 import { addStars } from '../lib/progress'
 import { CHEERS, pick } from '../lib/encourage'
 import { playCorrect, playWrong, playLevelClear } from '../lib/audio'
+import AnalogClock, { parseClockTime } from '../components/AnalogClock'
 
 const SECONDS = 60
 
@@ -149,6 +150,15 @@ export default function ArcadeQuiz({ go, config = {}, reward = false }) {
         }`}
       >
         <p className="min-h-[48px] text-2xl font-bold text-slate-800 sm:text-3xl">{q.question}</p>
+        {q.topic === '看時鐘' &&
+          (() => {
+            const t = parseClockTime(q.question)
+            return t ? (
+              <div className="mt-2 flex justify-center">
+                <AnalogClock h={t.h} m={t.m} size={130} />
+              </div>
+            ) : null
+          })()}
         {flash === 'right' && cheer && <p className="mt-1 text-xl font-extrabold text-green-600">{cheer}</p>}
         {flash === 'wrong' && <p className="mt-1 text-xl font-bold text-rose-500">正確:{q.answer}</p>}
       </div>

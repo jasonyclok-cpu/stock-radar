@@ -4,7 +4,8 @@ import { getStars, getStreak, spendStars, getUnlocked } from '../lib/progress'
 import { load, save } from '../lib/storage'
 import { playClick, playLevelClear } from '../lib/audio'
 import { GAME_COST, gamesByCat } from '../games/registry'
-import { canPlay, recordPlay, cooldownSeconds } from '../lib/playlimit'
+import { canPlay, cooldownSeconds } from '../lib/playlimit'
+import { isMuted, toggleMuted } from '../lib/sound'
 import Mascot from '../components/Mascot'
 import Backdrop from '../components/Backdrop'
 
@@ -12,6 +13,7 @@ export default function Home({ go, toast }) {
   const stars = getStars()
   const streak = getStreak()
   const [message, setMessage] = useState(toast || '')
+  const [mutedUI, setMutedUI] = useState(() => isMuted())
   // 記住上次揀嘅年級(預設小二)
   const [grade, setGrade] = useState(() => load('grade', '小二'))
   const pickGrade = (g) => {
@@ -41,7 +43,7 @@ export default function Home({ go, toast }) {
         setMessage(`呢個遊戲玩咗好多次喇,唞 ${Math.max(1, Math.ceil(cooldownSeconds(game.id) / 60))} 分鐘先,試下第二個啦!😊`)
         return
       }
-      recordPlay(game.id)
+      // 次數喺遊戲入面玩咗一陣先記(App 嘅 PlayLimitTracker),誤撳即退唔嘥額
       playLevelClear()
       go(game.id)
       return
@@ -85,6 +87,16 @@ export default function Home({ go, toast }) {
           <span className="kid-card flex items-center gap-1 px-4 py-2 text-xl font-extrabold text-orange-500">
             🔥 {streak} 日
           </span>
+          <button
+            onClick={() => {
+              toggleMuted()
+              setMutedUI(isMuted())
+            }}
+            aria-label={mutedUI ? '開返聲' : '靜音'}
+            className="kid-card flex items-center px-4 py-2 text-xl"
+          >
+            {mutedUI ? '🔇' : '🔊'}
+          </button>
         </div>
       </header>
 

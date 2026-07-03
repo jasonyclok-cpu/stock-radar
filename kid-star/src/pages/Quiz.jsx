@@ -16,7 +16,8 @@ import { addStars, bumpStreak, logAnswer, unlockNext } from '../lib/progress'
 import { playCorrect, playWrong, playLevelClear, playClick } from '../lib/audio'
 import Mascot from '../components/Mascot'
 import Backdrop from '../components/Backdrop'
-import { speak, speechSupported } from '../lib/speech'
+import { speakMixed, speechSupported } from '../lib/speech'
+import AnalogClock, { parseClockTime } from '../components/AnalogClock'
 import MultipleChoice from '../components/questions/MultipleChoice'
 import FillBlank from '../components/questions/FillBlank'
 import Matching from '../components/questions/Matching'
@@ -200,9 +201,18 @@ export default function Quiz({ subject, grade, levelId, go }) {
           <p className="min-h-[56px] pr-16 text-3xl font-bold leading-relaxed text-slate-800 sm:text-4xl">
             {current.q.question}
           </p>
+          {current.q.topic === '看時鐘' &&
+            (() => {
+              const t = parseClockTime(current.q.question)
+              return t ? (
+                <div className="mt-3 flex justify-center">
+                  <AnalogClock h={t.h} m={t.m} size={160} />
+                </div>
+              ) : null
+            })()}
           {speechSupported() && (
             <button
-              onClick={() => speak(current.q.question, subject === 'english' ? 'en-US' : 'zh-HK')}
+              onClick={() => speakMixed(current.q.question)}
               className="kid-btn mt-3 bg-sky-100 px-4 py-2 text-xl text-sky-700 ring-2 ring-sky-200"
             >
               🔊 讀題目
