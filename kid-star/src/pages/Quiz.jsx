@@ -12,7 +12,7 @@ import {
   getRecentlySeen,
   recordSeen,
 } from '../lib/quizEngine'
-import { addStars, bumpStreak, logAnswer, unlockNext } from '../lib/progress'
+import { addStars, bumpStreak, logAnswer, unlockNext, recordRoundDone } from '../lib/progress'
 import { playCorrect, playWrong, playLevelClear, playClick } from '../lib/audio'
 import Mascot from '../components/Mascot'
 import Backdrop from '../components/Backdrop'
@@ -26,10 +26,19 @@ import Reorder from '../components/questions/Reorder'
 const PRAISES = ['好叻呀!', '答得好!', '勁呀!', '太棒了!', '叻仔!']
 const COMFORTS = ['唔緊要,睇下點解!', '差少少咋,一齊學下!', '冇問題,下次得!']
 
-export default function Quiz({ subject, grade, levelId, go }) {
-  const pool = useMemo(() => getLevelPool(subject, grade, levelId), [subject, grade, levelId])
-  const levelsInGrade = LEVELS[subject][grade]
-  const level = levelsInGrade.find((l) => l.id === levelId)
+// custom = { pool, title }:自訂題目池模式(例如錯題特訓),
+// 唔影響關卡解鎖同科目自適應狀態,其他玩法一樣。
+export default function Quiz({ subject, grade, levelId, go, custom = null }) {
+  const isCustom = !!custom
+  const pool = useMemo(
+    () => (isCustom ? custom.pool : getLevelPool(subject, grade, levelId)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [subject, grade, levelId, isCustom],
+  )
+  const levelsInGrade = isCustom ? [] : LEVELS[subject][grade]
+  const level = isCustom ? { emoji: '🔁', name: custom.title } : levelsInGrade.find((l) => l.id === levelId)
+  // 自適應/唔重複紀錄用嘅 key:custom 模式有自己一格,唔會污染科目數據
+  const adaptKey = isCustom ? 'review' : subject
   const mainTotal = Math.min(ROUND_SIZE, pool.length)
 
   // 回合內可變狀態用 ref,避免事件回呼讀到舊值
@@ -37,9 +46,9 @@ export default function Quiz({ subject, grade, levelId, go }) {
   if (round.current === null) {
     const usedIds = new Set()
     // 避免同最近幾回合出過嘅題重複(前提係題庫夠大,唔夠就照舊)
-    const recent = getRecentlySeen(subject)
+    const recent = getRecentlySeen(adaptKey)
     if (pool.length - recent.length >= mainTotal + 2) recent.forEach((id) => usedIds.add(id))
-    const first = pickQuestion(pool, usedIds, getAdaptive(subject).bias)
+    const first = pickQuestion(pool, usedIds, getAdaptive(adaptKey).bias)
     if (first) usedIds.add(first.id)
     round.current = {
       usedIds,
@@ -64,10 +73,11 @@ export default function Quiz({ subject, grade, levelId, go }) {
     // 用實際答過嘅主題目數做分母:細題庫時加練題會「借走」題目,主題目可能少過 6 條
     const accuracy = r.mainAnswered > 0 ? r.correctCount / r.mainAnswered : 0
     const passed = accuracy >= PASS_RATE
-    recordSeen(subject, r.shownIds) // 記低今回合出過嘅題,下回合儘量唔重複
+    recordSeen(adaptKey, r.shownIds) // 記低今回合出過嘅題,下回合儘量唔重複
     bumpStreak()
+    recordRoundDone() // 每日任務進度
     if (passed) {
-      unlockNext(subject, grade, levelId, levelsInGrade.length)
+      if (!isCustom) unlockNext(subject, grade, levelId, levelsInGrade.length)
       playLevelClear()
       confetti({ particleCount: 160, spread: 90, origin: { y: 0.6 } })
       setTimeout(() => confetti({ particleCount: 120, spread: 120, origin: { y: 0.4 } }), 400)
@@ -80,7 +90,7 @@ export default function Quiz({ subject, grade, levelId, go }) {
     let next = null
     let isRetry = false
     if (r.mainAnswered < mainTotal) {
-      next = pickQuestion(pool, r.usedIds, getAdaptive(subject).bias)
+      next = pickQuestion(pool, r.usedIds, getAdaptive(adaptKey).bias)
       if (next) {
         r.usedIds.add(next.id)
         r.shownIds.push(next.id)
@@ -103,9 +113,9 @@ export default function Quiz({ subject, grade, levelId, go }) {
     if (phase !== 'question') return
     const r = round.current
     const q = current.q
-    recordAdaptive(subject, correct)
+    recordAdaptive(adaptKey, correct)
     logAnswer({
-      subject,
+      subject: subject || q.subject,
       topic: q.topic,
       questionId: q.id,
       question: q.question,
@@ -154,7 +164,16 @@ export default function Quiz({ subject, grade, levelId, go }) {
   }
 
   if (phase === 'result') {
-    return <ResultScreen subject={subject} grade={grade} levelId={levelId} round={round.current} go={go} />
+    return (
+      <ResultScreen
+        subject={subject}
+        grade={grade}
+        levelId={levelId}
+        isCustom={isCustom}
+        round={round.current}
+        go={go}
+      />
+    )
   }
 
   const r = round.current
@@ -254,11 +273,11 @@ export default function Quiz({ subject, grade, levelId, go }) {
   )
 }
 
-function ResultScreen({ subject, grade, levelId, round, go }) {
+function ResultScreen({ subject, grade, levelId, isCustom, round, go }) {
   const answered = round.mainAnswered || 1
   const accuracy = Math.round((round.correctCount / answered) * 100)
   const passed = round.correctCount / answered >= PASS_RATE
-  const isLastLevel = levelId >= LEVELS[subject][grade].length
+  const isLastLevel = isCustom ? false : levelId >= LEVELS[subject][grade].length
   return (
     <CenterCard>
       <Mascot mood={passed ? 'cheer' : 'idle'} size={110} />
@@ -274,15 +293,19 @@ function ResultScreen({ subject, grade, levelId, round, go }) {
         </div>
       </div>
       <p className="mt-4 max-w-sm text-center text-2xl text-slate-600">
-        {passed
-          ? isLastLevel
-            ? '全部關卡完成晒,你係超級小明星!🌟'
-            : '下一關解鎖咗喇,繼續衝呀!🚀'
-          : '已經好接近喇!再試一次,你一定得!💪'}
+        {isCustom
+          ? passed
+            ? '之前錯嘅題而家識晒,好犀利!🌟'
+            : '慢慢嚟,錯過嘅題再練多幾次就記得!💪'
+          : passed
+            ? isLastLevel
+              ? '全部關卡完成晒,你係超級小明星!🌟'
+              : '下一關解鎖咗喇,繼續衝呀!🚀'
+            : '已經好接近喇!再試一次,你一定得!💪'}
       </p>
       <div className="mt-6 flex gap-4">
         <button
-          onClick={() => go('quiz', { subject, grade, levelId })}
+          onClick={() => (isCustom ? go('review') : go('quiz', { subject, grade, levelId }))}
           className="kid-btn bg-yellow-400 px-8 py-4 text-2xl text-yellow-900"
         >
           {passed ? '再玩一次' : '再試一次'} 🔁

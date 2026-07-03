@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { SUBJECTS, LEVELS, GRADES } from '../data/levels'
-import { getStars, getStreak, spendStars, getUnlocked } from '../lib/progress'
+import {
+  getStars,
+  getStreak,
+  spendStars,
+  getUnlocked,
+  getDaily,
+  claimDaily,
+  DAILY_TARGET,
+  DAILY_REWARD,
+} from '../lib/progress'
 import { load, save } from '../lib/storage'
 import { playClick, playLevelClear } from '../lib/audio'
 import { GAME_COST, gamesByCat } from '../games/registry'
@@ -14,6 +23,7 @@ export default function Home({ go, toast }) {
   const streak = getStreak()
   const [message, setMessage] = useState(toast || '')
   const [mutedUI, setMutedUI] = useState(() => isMuted())
+  const [daily, setDaily] = useState(() => getDaily())
   // 記住上次揀嘅年級(預設小二)
   const [grade, setGrade] = useState(() => load('grade', '小二'))
   const pickGrade = (g) => {
@@ -116,6 +126,34 @@ export default function Home({ go, toast }) {
           {message}
         </div>
       )}
+
+      {/* 每日任務 */}
+      <div className="mt-4 kid-card flex flex-wrap items-center gap-3 px-4 py-3">
+        <span className="text-2xl">📅</span>
+        <span className="text-lg font-extrabold text-sky-700 sm:text-xl">
+          今日任務:完成 {DAILY_TARGET} 個回合({Math.min(daily.rounds, DAILY_TARGET)}/{DAILY_TARGET})
+        </span>
+        <span className="flex flex-1 justify-end">
+          {daily.claimed ? (
+            <span className="rounded-full bg-green-100 px-4 py-1 text-lg font-extrabold text-green-600">✅ 完成!</span>
+          ) : daily.rounds >= DAILY_TARGET ? (
+            <button
+              onClick={() => {
+                if (claimDaily()) {
+                  playLevelClear()
+                  setDaily(getDaily())
+                  setMessage(`叻仔!每日任務完成,+${DAILY_REWARD} ⭐!🎁`)
+                }
+              }}
+              className="kid-btn animate-pop bg-amber-400 px-5 py-2 text-lg font-extrabold text-amber-900"
+            >
+              🎁 領 +{DAILY_REWARD} ⭐
+            </button>
+          ) : (
+            <span className="text-lg font-bold text-slate-400">做完有 +{DAILY_REWARD} ⭐</span>
+          )}
+        </span>
+      </div>
 
       {/* 年級切換 */}
       <div className="mt-5 flex items-center gap-3">

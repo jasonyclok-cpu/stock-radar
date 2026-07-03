@@ -65,6 +65,35 @@ export function unlockNext(subject, grade, levelId, maxLevel) {
   }
 }
 
+// ---- 每日任務:今日完成 N 個回合,領 +5⭐ ----
+export const DAILY_TARGET = 3
+export const DAILY_REWARD = 5
+
+export function getDaily() {
+  const d = load('daily', null)
+  const today = todayStr()
+  if (!d || d.date !== today) return { date: today, rounds: 0, claimed: false }
+  return d
+}
+
+export function recordRoundDone() {
+  const d = getDaily()
+  d.rounds += 1
+  save('daily', d)
+  return d
+}
+
+export function claimDaily() {
+  const d = getDaily()
+  if (d.rounds >= DAILY_TARGET && !d.claimed) {
+    d.claimed = true
+    save('daily', d)
+    addStars(DAILY_REWARD)
+    return true
+  }
+  return false
+}
+
 // ---- 答題紀錄(家長後台統計用) ----
 export function logAnswer(entry) {
   const log = load('answerLog', [])
