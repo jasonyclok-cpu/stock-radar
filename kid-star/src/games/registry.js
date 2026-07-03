@@ -18,6 +18,7 @@ export const GAMES = [
   { id: 'arcade-mw', cat: 'learn', title: '量詞王', emoji: '🐶', desc: '一隻狗、一本書…揀啱量詞!', cost: 10, from: 'from-teal-400', to: 'to-cyan-500', arcade: { topics: ['量詞'], title: '量詞王' } },
   { id: 'arcade-clock', cat: 'learn', title: '時間王', emoji: '🕐', desc: '睇時鐘、星期月曆鬥快!', cost: 10, from: 'from-cyan-400', to: 'to-sky-500', arcade: { topics: ['看時鐘', '星期和月曆'], title: '時間王' } },
   { id: 'dictation', cat: 'learn', title: '英文默書', emoji: '✏️', desc: '聽住讀音,砌字母串返個字!', cost: 10, from: 'from-emerald-400', to: 'to-teal-500' },
+  { id: 'story', cat: 'learn', title: '故事小劇場', emoji: '🎬', desc: '睇動畫故事,邊播邊學,睇完答題!', cost: 0, from: 'from-pink-400', to: 'to-rose-500' },
 
   // ===== 專注力遊戲(共 7 個,其中 2 個免費限時)=====
   { id: 'traffic', cat: 'focus', title: '紅綠燈', emoji: '🚦', desc: '綠燈快撳,紅燈唔好撳!', cost: 0, from: 'from-green-400', to: 'to-emerald-500' },
