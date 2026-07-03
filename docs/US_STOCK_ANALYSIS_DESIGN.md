@@ -1,0 +1,210 @@
+# 美股雷達 2.0 — 分析系統設計書
+
+> 目標讀者：自己（個人投資輔助工具）
+> 狀態：設計提案（未實施）
+> 前提：唔係投資建議系統，係「幫自己睇市、篩股、控風險」嘅雷達。
+
+---
+
+## 1. 現狀盤點：而家有咩
+
+`analysis_engine.py` + `app.py` 已經有：
+
+| 模組 | 功能 | 對美股嘅問題 |
+|------|------|------------|
+| A 數據 | yfinance 抓價格 + 基本面 | ✅ 美股可用，但冇 earnings 日期、冇板塊資料 |
+| B 訊號 | MA20/60 金叉、RSI 30/70、MACD 交叉 → BUY_SCORE | ⚠️ 全部係滯後指標，冇考慮大市環境 |
+| C 掃描 | Watchlist 批量掃描 | ⚠️ 美股得 5 隻（AAPL/MSFT/NVDA/TSLA/META），唔算「篩選」 |
+| D 回測 | 單股策略回測 + 止蝕止賺 | ✅ 可重用 |
+| E Kelly | 倉位建議 | ✅ 可重用 |
+| F Monte Carlo | VaR / CVaR 風險估算 | ✅ 可重用 |
+| G LightGBM | 因子模型評分 | ⚠️ 冇訓練 pipeline，model 檔唔存在就直接跳過 |
+| H/I | 圖表 + Telegram/Email 通知 | ✅ 可重用 |
+
+**核心缺口**：而家個系統係「逐隻股睇技術指標」，但美股分析最重要嘅三樣嘢佢都冇——
+1. **大市環境**（risk-on 定 risk-off？而家啱唔啱買貨？）
+2. **選股範圍**（成個市場咁多股，睇邊 5 隻唔係分析，係碰運氣）
+3. **美股特有事件**（業績期、板塊輪動）
+
+---
+
+## 2. 方向選擇：三個可行方向
+
+| 方向 | 內容 | 評估 |
+|------|------|------|
+| A. 短線訊號機 | 加更多技術指標、分鐘級數據、日內訊號 | ❌ 唔建議：免費數據唔支持、散戶短線勝率低、維護成本高 |
+| B. 深度基本面 | 財報拆解、DCF 估值、同業比較 | ⚠️ 有價值但免費數據質素差，工作量大 |
+| **C. 三層漏斗雷達** | 大市環境 → 全市場篩選 → 個股深挖 | ✅ **推薦**：重用最多現有代碼、免費數據夠用、每日自動化 |
+
+**推薦方向 C**，理由：
+- 佢解決嘅係「冇方向」呢個真問題——每日話你知「而家市況點、邊啲股值得睇、睇完點落注」
+- 現有嘅回測、Kelly、Monte Carlo、通知全部可以直接砌入去
+- yfinance 免費數據完全夠用，唔使課金
+
+---
+
+## 3. 核心設計：三層漏斗（Funnel）
+
+```
+第一層 市場溫度計 (Market Regime)
+   SPY/QQQ 趨勢 + VIX + 市寬
+   ↓ 輸出：紅／黃／綠燈
+第二層 全市場掃描 (Universe Scan)
+   S&P 500 + Nasdaq 100 (~550 隻)
+   相對強度排名 + 板塊輪動 + 現有 BUY_SCORE
+   ↓ 輸出：Top 20 候選名單
+第三層 個股深挖 (Deep Dive)
+   技術面 + 基本面 + 業績日距離 + 回測 + Kelly 倉位 + Monte Carlo 風險
+   ↓ 輸出：每隻股一張「分析卡」
+```
+
+### 3.1 第一層：市場溫度計 `market_regime.py`
+
+每日計一次，決定今日應唔應該進取。
+
+| 指標 | 計法 | 訊號 |
+|------|------|------|
+| 大市趨勢 | SPY 收市 vs MA50/MA200 | 企穩 MA200 之上 = 多頭 |
+| 恐慌指數 | ^VIX 水平 + 5 日變化 | VIX > 25 或急升 = 避險 |
+| 市寬 | 掃描 universe 中股價 > MA50 嘅比例 | > 60% 健康，< 40% 弱 |
+| 動量 | QQQ 20 日回報 | 正／負 |
+
+**輸出：燈號制**
+- 🟢 綠燈（3-4 項健康）：正常執行買入訊號
+- 🟡 黃燈（2 項健康）：只做強訊號，倉位減半
+- 🔴 紅燈（0-1 項健康）：唔開新倉，只提示沽出訊號
+
+> 呢層係成個系統最有價值嘅升級——現有 BUY_SCORE 喺熊市一樣會叫你買，加咗燈號之後訊號會過濾。
+
+### 3.2 第二層：全市場掃描 `universe.py` + 改造現有 `scan_watchlist`
+
+**Universe**：S&P 500 + Nasdaq 100 成分股（Wikipedia 有現成表，pandas `read_html` 一行搞掂，每週更新一次 cache 落 SQLite）。
+
+**排名因子**（每日收市後計）：
+1. **相對強度 RS**：個股 3 個月回報 − SPY 3 個月回報，全 universe 排百分位（呢個係美股界最有實證嘅因子之一）
+2. **板塊強度**：11 隻 SPDR 板塊 ETF（XLK、XLF、XLE…）20 日動量排名 → 個股所屬板塊係咪頭 4 強
+3. **現有 BUY_SCORE**：技術訊號分（重用 Module B）
+4. **52 週位置 POS_52W**：重用 Module G 已有嘅計法
+5. **成交量比 VOL_RATIO**：重用現有計法，異動放量加分
+
+**綜合分 = RS 百分位 × 0.35 + 板塊強度 × 0.2 + 技術分 × 0.25 + 52週位置 × 0.1 + 量比 × 0.1**
+
+輸出 Top 20 落 SQLite（`daily_ranks` 表），前端直接讀。
+
+**工程注意**：550 隻 × yfinance 每日一次，用現有 ThreadPoolExecutor（max_workers=3~5）+ 批量 `yf.download`，大約 5-10 分鐘走完，放喺收市後排程冇問題。要加 retry + 本地價格 cache（SQLite 存日線，每日只增量更新），唔好每次全量拉。
+
+### 3.3 第三層：個股分析卡 `deep_dive.py`
+
+對 Top 20（或者用戶手動查嘅任何 ticker）出一張卡，內容：
+
+```
+┌─────────────────────────────────┐
+│ NVDA  綜合分 87/100   🟢市況    │
+│ ── 趨勢 ──                      │
+│ 價格 vs MA20/50/200、RS 百分位  │
+│ ── 訊號 ──                      │
+│ BUY_SCORE 2/3 (MACD金叉+RSI回升)│
+│ ── 事件 ──                      │
+│ ⚠️ 業績日 8/27（15 個交易日後） │
+│ ── 風險 ──                      │
+│ ATR 止蝕位 $xxx（-6.8%）        │
+│ Monte Carlo 30日 VaR95: -12%    │
+│ ── 倉位 ──                      │
+│ Kelly 建議：資金 8%，xx 股      │
+│ ── 回測 ──                      │
+│ 2年 COMBINED 策略：+34%，勝率58%│
+└─────────────────────────────────┘
+```
+
+新增嘅只有兩樣：
+- **業績日距離**：`yf.Ticker(sym).calendar`，業績前 5 個交易日內提示「事件風險」，訊號降級
+- **綜合分**：第二層嘅排名分帶落嚟
+
+其餘全部係現有 Module D/E/F 嘅重新包裝。
+
+### 3.4 每日晨報（重用 Module I 通知）
+
+排程改成美股節奏（而家 cron 係 16:05 本地時間，要改）：
+- **收市後掃描**：美東 16:30 = 香港早上 04:30（夏令）→ 排 HK 時間 07:00 跑，你起身啱啱好收到
+- 內容（Telegram 一條訊息 + 圖）：
+  1. 今日燈號 + 原因（SPY 趨勢／VIX／市寬）
+  2. Top 10 排名（升跌、綜合分、訊號）
+  3. 持倉股（自選 watchlist）有冇沽出／止蝕訊號
+  4. 未來 7 日 watchlist 業績日曆
+
+---
+
+## 4. API 設計（加落 `app.py`）
+
+| Endpoint | 方法 | 功能 |
+|----------|------|------|
+| `/api/regime` | GET | 今日市場燈號 + 四項指標明細 |
+| `/api/rank` | GET | 全市場 Top N 排名（query: `top_n`, `sector`） |
+| `/api/card/{symbol}` | GET | 個股分析卡（第三層全套 JSON） |
+| `/api/earnings` | GET | watchlist 未來 14 日業績日曆 |
+| `/api/sectors` | GET | 11 板塊 ETF 動量排名 |
+| 現有 endpoints | — | 全部保留不變 |
+
+前端（`static/index.html`）加三個 tab：**市況**（燈號儀表板）、**排行**（Top 20 卡片列表）、**個股**（現有搜尋 + 新分析卡）。
+
+---
+
+## 5. 數據層改造
+
+而家每次 request 都即時拉 yfinance，慢兼容易被 rate limit。改成：
+
+```
+SQLite (output/cache.db 擴展)
+├── prices        (symbol, date, OHLCV)   ← 每日增量更新
+├── universe      (symbol, name, sector)  ← 每週更新
+├── daily_ranks   (date, symbol, rs_pct, score, ...) ← 每日寫入
+├── regime        (date, light, spy_trend, vix, breadth, momentum)
+└── earnings      (symbol, next_date, checked_at)
+```
+
+API 讀 DB 為主，`fetch_price_data` 加一層「先查 cache、缺先拉網」。咁樣前端秒開，而且累積咗歷史排名數據，將來訓練 LightGBM（Module G）就有現成 dataset。
+
+---
+
+## 6. 實施計劃（三個 Phase，每個獨立可用）
+
+### Phase 1：市場溫度計 + 排程改時區（~1 個 session）
+- `market_regime.py`（SPY/QQQ/VIX/市寬四指標 → 燈號）
+- `/api/regime` + 前端市況卡
+- cron 改做 HK 07:00（美股收市後）
+- 晨報加燈號
+
+**呢個 Phase 最細但價值最高，建議先做。**
+
+### Phase 2：全市場掃描 + 排行榜（~1-2 個 session）
+- Universe 抓取（S&P500 + NDX100）
+- 價格 SQLite cache + 增量更新
+- RS 排名 + 板塊強度 + 綜合分
+- `/api/rank`、`/api/sectors` + 前端排行 tab
+
+### Phase 3：分析卡 + 業績日曆（~1 個 session）
+- 業績日抓取 + 事件風險降級
+- `/api/card/{symbol}` 整合回測/Kelly/MC
+- 前端分析卡 UI + 晨報加業績提示
+
+### 之後（有數據先做）
+- Phase 2 跑滿 3 個月後，用累積嘅 `daily_ranks` + 未來回報訓練 LightGBM，激活 Module G
+- 自選 watchlist CRUD（而家 hardcode 喺 `WATCHLIST`）
+
+---
+
+## 7. 風險與限制（要老實面對）
+
+1. **yfinance 係非官方 API**：會間歇性失效，所有抓取要有 retry + cache fallback；如果將來想穩陣，可以換 Tiingo/Alpha Vantage 免費 tier（設計上 `fetch_price_data` 已經係唯一入口，換源只改一個函數）
+2. **技術訊號冇聖杯**：BUY_SCORE 回測要誠實睇，好多時跑輸 buy & hold；呢個系統嘅價值係**紀律同風控**（燈號、止蝕、倉位），唔係預測
+3. **倖存者偏差**：用而家嘅成分股名單回測歷史會高估回報，回測結果只作參考
+4. **唔好過度擬合**：綜合分嘅權重（0.35/0.2/…）係起點，唔好見一個月唔 work 就狂調
+
+---
+
+## 8. 決策摘要
+
+- **方向**：三層漏斗（市況 → 篩選 → 深挖），唔做短線、唔做深度基本面
+- **原則**：最大程度重用現有 Module B/D/E/F/H/I，新增代碼集中喺 regime、universe、cache 三塊
+- **次序**：Phase 1 市場溫度計先行
+- **數據**：繼續用 yfinance，但加 SQLite cache 層
