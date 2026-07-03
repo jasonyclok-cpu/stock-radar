@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Home from './pages/Home'
 import Quiz from './pages/Quiz'
 import ParentDashboard from './pages/ParentDashboard'
@@ -15,6 +15,8 @@ import ArcadeQuiz from './games/ArcadeQuiz'
 import TrueFalse from './games/TrueFalse'
 import MakeTen from './games/MakeTen'
 import { findGame } from './games/registry'
+import { recordPlay } from './lib/playlimit'
+import UpdateToast from './components/UpdateToast'
 
 // 有獨立元件嘅遊戲(arcade 類唔使,統一用 ArcadeQuiz)
 const SPECIFIC = {
@@ -31,22 +33,47 @@ const SPECIFIC = {
   maze: Maze,
 }
 
+// 免費遊戲嘅次數追蹤:開始咗 8 秒先算「玩咗一次」,誤撳即退唔會嘥額
+function PlayLimitTracker({ id }) {
+  useEffect(() => {
+    const t = setTimeout(() => recordPlay(id), 8000)
+    return () => clearTimeout(t)
+  }, [id])
+  return null
+}
+
 export default function App() {
   // 簡單畫面切換;nonce 確保「再玩一次」會重新開始
   const [screen, setScreen] = useState({ name: 'home' })
   const go = (name, params = {}) => setScreen({ name, nonce: Date.now(), ...params })
 
-  if (screen.name === 'quiz')
-    return <Quiz key={screen.nonce} subject={screen.subject} grade={screen.grade} levelId={screen.levelId} go={go} />
-  if (screen.name === 'parent') return <ParentDashboard go={go} />
+  let page = <Home go={go} toast={screen.toast} />
+  let tracker = null
 
-  const game = findGame(screen.name)
-  if (game) {
-    if (game.arcade)
-      return <ArcadeQuiz key={screen.nonce} go={go} config={game.arcade} reward={game.cost === 0} />
-    const C = SPECIFIC[game.id]
-    if (C) return <C key={screen.nonce} go={go} />
+  if (screen.name === 'quiz') {
+    page = (
+      <Quiz key={screen.nonce} subject={screen.subject} grade={screen.grade} levelId={screen.levelId} go={go} />
+    )
+  } else if (screen.name === 'parent') {
+    page = <ParentDashboard go={go} />
+  } else {
+    const game = findGame(screen.name)
+    if (game) {
+      if (game.cost === 0) tracker = <PlayLimitTracker key={'t' + screen.nonce} id={game.id} />
+      if (game.arcade) {
+        page = <ArcadeQuiz key={screen.nonce} go={go} config={game.arcade} reward={game.cost === 0} />
+      } else {
+        const C = SPECIFIC[game.id]
+        if (C) page = <C key={screen.nonce} go={go} />
+      }
+    }
   }
 
-  return <Home go={go} toast={screen.toast} />
+  return (
+    <>
+      {page}
+      {tracker}
+      <UpdateToast />
+    </>
+  )
 }

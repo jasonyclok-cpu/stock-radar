@@ -44,7 +44,7 @@ export function buildAnalysis(focus) {
       value: r == null ? '—' : Math.round(r) + ' 毫秒',
       ...trend(r, p, true),
       text: pctText(r, p, true, '反應快咗,專注力提升緊 👍', '反應慢咗少少,可能攰咗或者分心。'),
-      note: '來源:紅綠燈、舒爾特',
+      note: '來源:紅綠燈',
     })
   }
 

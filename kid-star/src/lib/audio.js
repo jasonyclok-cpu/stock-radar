@@ -1,4 +1,6 @@
 // 用 Web Audio API 即場生成音效,唔使任何外部音效檔。
+import { isMuted } from './sound'
+
 let ctx = null
 
 function getCtx() {
@@ -13,6 +15,7 @@ function getCtx() {
 }
 
 function tone(freq, startAt, duration, { type = 'sine', volume = 0.25 } = {}) {
+  if (isMuted()) return
   const ac = getCtx()
   if (!ac) return
   const osc = ac.createOscillator()
