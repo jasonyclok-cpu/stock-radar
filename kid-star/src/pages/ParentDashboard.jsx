@@ -187,6 +187,21 @@ export default function ParentDashboard({ go }) {
         </>
       )}
 
+      {/* 錯題特訓 */}
+      <section className="mt-8">
+        <h2 className="text-xl font-bold text-slate-700">錯題特訓</h2>
+        <p className="text-sm text-slate-400">
+          由最近錯題自動生成一個回合(小朋友端只會見到普通闖關畫面,唔會標明「錯題」)。
+        </p>
+        <button
+          onClick={() => go('review')}
+          disabled={recentWrong.length === 0}
+          className="kid-btn mt-2 bg-sky-500 px-6 py-3 text-lg text-white disabled:opacity-40"
+        >
+          🔁 開始錯題特訓{recentWrong.length === 0 ? '(暫時冇錯題)' : ''}
+        </button>
+      </section>
+
       {/* 資料備份 / 匯入 */}
       <section className="mt-8">
         <h2 className="text-xl font-bold text-slate-700">資料備份</h2>

@@ -14,8 +14,10 @@ import Maze from './games/Maze'
 import ArcadeQuiz from './games/ArcadeQuiz'
 import TrueFalse from './games/TrueFalse'
 import MakeTen from './games/MakeTen'
+import Dictation from './games/Dictation'
 import { findGame } from './games/registry'
 import { recordPlay } from './lib/playlimit'
+import { getWrongPool } from './lib/quizEngine'
 import UpdateToast from './components/UpdateToast'
 
 // 有獨立元件嘅遊戲(arcade 類唔使,統一用 ArcadeQuiz)
@@ -31,6 +33,7 @@ const SPECIFIC = {
   sequence: SequenceRecall,
   spot: SpotDifference,
   maze: Maze,
+  dictation: Dictation,
 }
 
 // 免費遊戲嘅次數追蹤:開始咗 8 秒先算「玩咗一次」,誤撳即退唔會嘥額
@@ -54,6 +57,9 @@ export default function App() {
     page = (
       <Quiz key={screen.nonce} subject={screen.subject} grade={screen.grade} levelId={screen.levelId} go={go} />
     )
+  } else if (screen.name === 'review') {
+    // 錯題特訓:抽最近答錯過嘅題目做一個回合
+    page = <Quiz key={screen.nonce} custom={{ pool: getWrongPool(), title: '錯題特訓' }} go={go} />
   } else if (screen.name === 'parent') {
     page = <ParentDashboard go={go} />
   } else {

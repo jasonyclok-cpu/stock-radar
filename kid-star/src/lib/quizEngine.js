@@ -35,6 +35,24 @@ export function optionsOf(q) {
   return q.type === 'multiple_choice' ? q.options : q.choices
 }
 
+// 錯題特訓池:由答題紀錄搵返最近答錯過嘅題目(唔重複,最近優先)
+export function getWrongPool(limit = 12) {
+  const log = load('answerLog', [])
+  const all = [...BANKS.math, ...BANKS.chinese, ...BANKS.english]
+  const byId = new Map(all.map((q) => [q.id, q]))
+  const seen = new Set()
+  const pool = []
+  for (let i = log.length - 1; i >= 0; i--) {
+    const e = log[i]
+    if (e.correct || seen.has(e.questionId)) continue
+    seen.add(e.questionId)
+    const q = byId.get(e.questionId)
+    if (q) pool.push(q)
+    if (pool.length >= limit) break
+  }
+  return pool
+}
+
 // ---- 自適應難度(按科目分開記錄) ----
 // bias: -1 偏易、0 正常、+1 偏難
 export function getAdaptive(subject) {
