@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import pandas as pd
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse
@@ -34,6 +34,10 @@ from analysis_engine import (
     daily_scan_and_alert,
     WATCHLIST,
 )
+
+import telegram_bot
+
+TG_WEBHOOK_SECRET = os.getenv("TG_WEBHOOK_SECRET", "")
 
 # ── App setup ────────────────────────────
 app = FastAPI(title="Stock Analysis API", version="1.0.0")
@@ -67,6 +71,7 @@ def init_db():
 
 
 init_db()
+telegram_bot.init_tg_db()
 
 # ── Pydantic models ───────────────────────
 
@@ -291,6 +296,18 @@ async def api_watchlist():
     return WATCHLIST
 
 
+# ── Telegram webhook ──────────────────────
+@app.post("/api/telegram/webhook")
+async def telegram_webhook(request: Request, background_tasks: BackgroundTasks):
+    if TG_WEBHOOK_SECRET:
+        if request.headers.get("x-telegram-bot-api-secret-token") != TG_WEBHOOK_SECRET:
+            raise HTTPException(status_code=403, detail="Bad secret token")
+    update = await request.json()
+    # Ack immediately; agent replies can take seconds and Telegram retries slow webhooks
+    background_tasks.add_task(telegram_bot.handle_update, update)
+    return {"ok": True}
+
+
 # ── Scheduler ────────────────────────────
 scheduler = AsyncIOScheduler()
 
@@ -299,6 +316,7 @@ scheduler = AsyncIOScheduler()
 async def scheduled_scan():
     loop = asyncio.get_event_loop()
     await loop.run_in_executor(None, daily_scan_and_alert)
+    await loop.run_in_executor(None, telegram_bot.broadcast_daily_summary)
 
 
 @app.on_event("startup")
