@@ -30,6 +30,7 @@ HELP_TEXT = (
     "/stop - 取消訂閱\n"
     "/summary - 即刻攞一份市況摘要\n"
     "/reset - 清空對話記憶\n"
+    "/usage - 睇 AI 用量同估算成本\n"
     "/help - 顯示呢個說明\n\n"
     "⚠️ 本 bot 只提供數據分析,並非投資建議"
 )
@@ -60,6 +61,7 @@ def init_tg_db():
     """)
     conn.commit()
     conn.close()
+    agent.init_usage_db()
 
 
 def subscribe(chat_id: str):
@@ -178,6 +180,18 @@ def handle_update(update: dict):
             print(f"[TG] summary error: {e}")
             send_message(chat_id, "整摘要嗰陣出咗問題,遲啲再試。")
         return
+    if text.startswith("/usage"):
+        stats = agent.get_usage_stats()
+        send_message(chat_id, (
+            f"📊 AI 用量({stats['model']})\n\n"
+            f"今日:{stats['today']['calls']} 次調用,"
+            f"{stats['today']['input']:,} in / {stats['today']['output']:,} out tokens"
+            f",約 US${stats['today']['usd']}\n"
+            f"本月:{stats['month']['calls']} 次調用,"
+            f"{stats['month']['input']:,} in / {stats['month']['output']:,} out tokens"
+            f",約 US${stats['month']['usd']}"
+        ))
+        return
 
     # Free-form chat → agent
     if not check_and_count_usage(chat_id):
@@ -201,7 +215,7 @@ def broadcast_daily_summary():
         print("[TG] No subscribers, skipping daily summary")
         return
     try:
-        summary = agent.generate_daily_summary()
+        summary = agent.generate_daily_summary(force=True)
     except Exception as e:
         print(f"[TG] daily summary generation failed: {e}")
         return

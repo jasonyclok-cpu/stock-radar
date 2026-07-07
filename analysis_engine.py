@@ -10,6 +10,7 @@ import time as time_module
 import json
 import smtplib
 import sqlite3
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -46,15 +47,33 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 # MODULE A：Data Fetching
 # ─────────────────────────────────────────
 
+# 10-min TTL cache: agent chats + daily summary often hit the same symbols,
+# so repeated fetches within a session cost nothing and avoid data-source rate limits
+PRICE_CACHE_TTL = 600
+_price_cache: dict = {}
+_price_cache_lock = threading.Lock()
+
+
 def fetch_price_data(symbol: str, period: str = "1y") -> pd.DataFrame:
+    key = (symbol, period)
+    now = time_module.time()
+    with _price_cache_lock:
+        hit = _price_cache.get(key)
+    if hit and now - hit[0] < PRICE_CACHE_TTL:
+        return hit[1].copy()
     try:
         if symbol.startswith(("sh", "sz")):
-            return _fetch_a_share(symbol, period)
+            df = _fetch_a_share(symbol, period)
         else:
-            return _fetch_yfinance(symbol, period)
+            df = _fetch_yfinance(symbol, period)
     except Exception as e:
         print(f"[ERROR] fetch_price_data ({symbol}): {e}")
         return pd.DataFrame()
+    if not df.empty:
+        with _price_cache_lock:
+            _price_cache[key] = (now, df)
+        return df.copy()
+    return df
 
 
 def _fetch_a_share(symbol: str, period: str) -> pd.DataFrame:

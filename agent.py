@@ -6,7 +6,10 @@ Wraps analysis_engine functions as tools so users can chat with the system
 
 import os
 import json
+import sqlite3
 import threading
+import time
+from pathlib import Path
 
 import anthropic
 
@@ -23,8 +26,80 @@ from analysis_engine import (
 AGENT_MODEL = os.getenv("AGENT_MODEL", "claude-haiku-4-5")
 MAX_TOOL_TURNS = 6
 HISTORY_MAX_TURNS = 10  # user+assistant pairs kept per chat (in-memory)
+SUMMARY_CACHE_TTL = 3600  # /summary reuses the last generated summary within this window
+
+# USD per 1M tokens (input, output) — for the /usage cost estimate
+MODEL_PRICES = {
+    "claude-haiku-4-5": (1.0, 5.0),
+    "claude-sonnet-5": (3.0, 15.0),
+    "claude-opus-4-8": (5.0, 25.0),
+}
+
+DB_PATH = str(Path("./output") / "cache.db")
 
 _client = None
+
+
+# ── Token usage tracking ──────────────────
+
+def init_usage_db():
+    Path("./output").mkdir(exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS llm_usage (
+            day           TEXT PRIMARY KEY,
+            calls         INTEGER DEFAULT 0,
+            input_tokens  INTEGER DEFAULT 0,
+            output_tokens INTEGER DEFAULT 0
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+
+def _log_usage(response):
+    try:
+        usage = response.usage
+        tokens_in = (usage.input_tokens or 0) + (usage.cache_read_input_tokens or 0) \
+            + (usage.cache_creation_input_tokens or 0)
+        conn = sqlite3.connect(DB_PATH)
+        conn.execute(
+            "INSERT INTO llm_usage (day, calls, input_tokens, output_tokens) "
+            "VALUES (date('now'), 1, ?, ?) "
+            "ON CONFLICT(day) DO UPDATE SET calls = calls + 1, "
+            "input_tokens = input_tokens + ?, output_tokens = output_tokens + ?",
+            (tokens_in, usage.output_tokens, tokens_in, usage.output_tokens),
+        )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"[USAGE] logging failed: {e}")
+
+
+def get_usage_stats() -> dict:
+    conn = sqlite3.connect(DB_PATH)
+    today = conn.execute(
+        "SELECT calls, input_tokens, output_tokens FROM llm_usage WHERE day = date('now')"
+    ).fetchone() or (0, 0, 0)
+    month = conn.execute(
+        "SELECT COALESCE(SUM(calls),0), COALESCE(SUM(input_tokens),0), "
+        "COALESCE(SUM(output_tokens),0) FROM llm_usage "
+        "WHERE day >= date('now', 'start of month')"
+    ).fetchone()
+    conn.close()
+
+    price_in, price_out = MODEL_PRICES.get(AGENT_MODEL, (3.0, 15.0))
+
+    def cost(tokens_in, tokens_out):
+        return tokens_in / 1e6 * price_in + tokens_out / 1e6 * price_out
+
+    return {
+        "model": AGENT_MODEL,
+        "today": {"calls": today[0], "input": today[1], "output": today[2],
+                  "usd": round(cost(today[1], today[2]), 4)},
+        "month": {"calls": month[0], "input": month[1], "output": month[2],
+                  "usd": round(cost(month[1], month[2]), 4)},
+    }
 
 
 def get_client() -> anthropic.Anthropic:
@@ -213,6 +288,7 @@ def chat(chat_id: str, user_text: str) -> str:
             tools=TOOLS,
             messages=messages,
         )
+        _log_usage(response)
         if response.stop_reason != "tool_use":
             break
         messages.append({"role": "assistant", "content": response.content})
@@ -237,8 +313,29 @@ def chat(chat_id: str, user_text: str) -> str:
 
 # ── Daily market summary ──────────────────
 
-def generate_daily_summary() -> str:
-    """Scan the full watchlist and turn the numbers into a plain-language summary."""
+_summary_cache = {"text": None, "ts": 0.0}
+_summary_lock = threading.Lock()
+
+
+def generate_daily_summary(force: bool = False) -> str:
+    """Scan the full watchlist and turn the numbers into a plain-language summary.
+
+    Cached for SUMMARY_CACHE_TTL so repeated /summary taps cost one scan + one
+    LLM call instead of one each. The scheduled 16:05 broadcast passes force=True.
+    """
+    with _summary_lock:
+        if not force and _summary_cache["text"] \
+                and time.time() - _summary_cache["ts"] < SUMMARY_CACHE_TTL:
+            return _summary_cache["text"]
+
+    text = _generate_daily_summary_uncached()
+    with _summary_lock:
+        _summary_cache["text"] = text
+        _summary_cache["ts"] = time.time()
+    return text
+
+
+def _generate_daily_summary_uncached() -> str:
     df = scan_watchlist(_default_watchlist(), period="6mo", min_buy_score=0)
     if df.empty:
         return "📡 Stock Radar 每日摘要\n\n今日攞唔到掃描數據,可能係數據源問題,聽日再試。"
@@ -261,4 +358,5 @@ def generate_daily_summary() -> str:
                  "cache_control": {"type": "ephemeral"}}],
         messages=[{"role": "user", "content": prompt}],
     )
+    _log_usage(response)
     return "".join(b.text for b in response.content if b.type == "text").strip()
