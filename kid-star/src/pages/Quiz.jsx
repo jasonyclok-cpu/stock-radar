@@ -16,7 +16,6 @@ import { addStars, bumpStreak, logAnswer, unlockNext, recordRoundDone } from '..
 import { playCorrect, playWrong, playLevelClear, playClick } from '../lib/audio'
 import Mascot from '../components/Mascot'
 import Backdrop from '../components/Backdrop'
-import { speakMixed, speechSupported } from '../lib/speech'
 import AnalogClock, { parseClockTime } from '../components/AnalogClock'
 import MultipleChoice from '../components/questions/MultipleChoice'
 import FillBlank from '../components/questions/FillBlank'
@@ -229,14 +228,7 @@ export default function Quiz({ subject, grade, levelId, go, custom = null }) {
                 </div>
               ) : null
             })()}
-          {speechSupported() && (
-            <button
-              onClick={() => speakMixed(current.q.question)}
-              className="kid-btn mt-3 bg-sky-100 px-4 py-2 text-xl text-sky-700 ring-2 ring-sky-200"
-            >
-              🔊 讀題目
-            </button>
-          )}
+          {/* 「讀題目」掣已移除:訓練小朋友自己讀題,唔靠 app 代讀 */}
           <div className="mt-5">
             <QuestionComp key={current.q.id} question={current.q} disabled={phase !== 'question'} onAnswer={handleAnswer} />
           </div>

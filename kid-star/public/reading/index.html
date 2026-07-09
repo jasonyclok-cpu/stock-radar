@@ -120,7 +120,7 @@
   <div class="card">
     <div class="big-emoji">📖</div>
     <h1>閱讀小天地</h1>
-    <p>讀短文、聽朗讀、學生字，再答問題！<br>中文同英文都有，越讀越叻 🌟</p>
+    <p>自己大聲讀短文、學生字讀音，再答問題！<br>中文同英文都有，越讀越叻 🌟</p>
     <div id="startBtns"></div>
   </div>
 </div>
@@ -205,20 +205,18 @@
   function renderRead(){
     const p=cur;
     let h = `<div class="p-emoji">${p.emoji}</div><div class="p-title">${p.title}</div>`;
-    h += `<button class="speak-all" id="speakAll">🔊 讀全文</button>`;
+    h += `<div class="gloss-label" style="text-align:center">朗讀任務：請自己大聲讀出全文，唔識讀嘅字先撳下面生字學讀音</div>`;
     h += `<div class="sentences">`;
-    p.text.forEach((s,i)=> h += `<span class="sent" data-i="${i}">${s}<span class="spk"> 🔊</span></span> `);
+    p.text.forEach((s)=> h += `<span class="sent">${s}</span> `);
     h += `</div>`;
     const gk = Object.keys(p.glossary||{});
     if(gk.length){
-      h += `<div class="gloss-label">生字 📖（撳一下睇意思）</div><div class="gloss-row">`;
+      h += `<div class="gloss-label">生字（撳一下睇意思＋聽讀音）</div><div class="gloss-row">`;
       gk.forEach(w=> h += `<button class="gloss-chip" data-w="${w}">${w}</button>`);
       h += `</div>`;
     }
     h += `<button class="go-quiz" id="goQuiz">我讀完喇，答問題 ▶</button>`;
     const st=$("stage"); st.innerHTML=h; st.scrollTop=0;
-    $("speakAll").onclick=()=>speak(p.text.join(" "));
-    st.querySelectorAll(".sent").forEach(el=> el.onclick=()=>speak(p.text[+el.dataset.i]));
     st.querySelectorAll(".gloss-chip").forEach(el=> el.onclick=()=>showGloss(el.dataset.w, p.glossary[el.dataset.w]));
     $("goQuiz").onclick=renderQuiz;
     updateHud();
@@ -240,11 +238,10 @@
     const correctIdx = q.type==="tf" ? (q.answer?0:1) : q.answer;
     let h = `<div class="q-count">問題 ${qi+1} / ${p.questions.length}</div>`;
     h += `<div class="p-emoji" style="font-size:40px">${p.emoji}</div>`;
-    h += `<button class="speak-all" id="qSpeak">🔊 讀問題</button>`;
+    h += `<div class="gloss-label" style="text-align:center">請自己讀出問題，再揀答案</div>`;
     h += `<div class="q-text">${q.q}</div><div class="choices" id="choices"></div>`;
     h += `<div class="feedback" id="fb"></div>`;
     const st=$("stage"); st.innerHTML=h; st.scrollTop=0;
-    $("qSpeak").onclick=()=>speak(q.q);
     const cEl=$("choices");
     choices.forEach((c,idx)=>{ const b=document.createElement("button"); b.className="ans"; b.textContent=c;
       b.onclick=()=>answer(b, idx===correctIdx); cEl.appendChild(b); });
@@ -261,7 +258,7 @@
       setTimeout(()=>{ qi++; if(qi<cur.questions.length) renderQuiz(); else finishPassage(); }, 850);
     } else {
       tries++; btn.classList.add("no"); btn.disabled=true;
-      const fb=$("fb"); fb.className="feedback bad"; fb.textContent="再諗多次，可以撳 🔊 聽返 😊";
+      const fb=$("fb"); fb.className="feedback bad"; fb.textContent="再讀多次題目，慢慢諗 😊";
       setTimeout(()=>btn.classList.remove("no"),400);
     }
   }

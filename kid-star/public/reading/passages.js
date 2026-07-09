@@ -63,43 +63,67 @@ window.READING_DATA = [
     ]
   },
 
-  /* ---------------- English ---------------- */
+  /* ---------------- English（香港小二 P2 程度） ---------------- */
   {
-    id:"en-1", lang:"en", level:1, title:"A Dog", emoji:"🐶",
-    text:["I see a dog.","The dog is big."],
-    glossary:{ "see":"看見", "dog":"狗", "big":"大" },
+    id:"en-1", lang:"en", level:1, title:"My Dog Lucky", emoji:"🐶",
+    text:["I have a dog.","His name is Lucky.","He has short legs and a long tail.","He likes to run in the park.","I play with him after school every day."],
+    glossary:{ "short":"短", "tail":"尾巴", "park":"公園", "after school":"放學之後" },
     questions:[
-      { q:"What do you see?", choices:["a dog","a cat","a bird"], answer:0 },
-      { q:"Is the dog big or small?", choices:["big","small"], answer:0 }
+      { q:"What is the dog's name?", choices:["Bobby","Lucky","Sunny"], answer:1 },
+      { q:"What does Lucky like to do?", choices:["run in the park","sleep all day","eat apples"], answer:0 },
+      { q:"When do I play with Lucky?", choices:["before breakfast","at night","after school"], answer:2 }
     ]
   },
   {
-    id:"en-2", lang:"en", level:1, title:"A Red Apple", emoji:"🍎",
-    text:["This is an apple.","The apple is red.","I like it."],
-    glossary:{ "apple":"蘋果", "red":"紅色", "like":"喜歡" },
+    id:"en-2", lang:"en", level:1, title:"My School Bag", emoji:"🎒",
+    text:["This is my school bag.","It is blue and it is new.","There are three books and a pencil case in it.","I take it to school every morning.","I always keep it clean and tidy."],
+    glossary:{ "pencil case":"筆盒", "every morning":"每朝早", "tidy":"整齊" },
     questions:[
-      { q:"What is this?", choices:["an apple","an egg","a ball"], answer:0 },
-      { q:"What colour is the apple?", choices:["red","blue","green"], answer:0 }
+      { q:"What colour is the school bag?", choices:["red","blue","green"], answer:1 },
+      { q:"How many books are in the bag?", choices:["two","four","three"], answer:2 },
+      { q:"How do I keep my bag?", choices:["clean and tidy","old and dirty","open and wet"], answer:0 }
     ]
   },
   {
-    id:"en-3", lang:"en", level:2, title:"A Little Fish", emoji:"🐟",
-    text:["A little fish lives in the sea.","It likes to swim.","Every day it plays with its friends."],
-    glossary:{ "sea":"海", "swim":"游泳", "friends":"朋友" },
+    id:"en-3", lang:"en", level:2, title:"A Rainy Day", emoji:"🌧️",
+    text:["It is raining today.","Ben cannot play football in the park.","He stays at home and reads a storybook.","The story is about a brave lion.","Ben thinks reading is fun too."],
+    glossary:{ "raining":"落緊雨", "storybook":"故事書", "brave":"勇敢", "fun":"有趣、好玩" },
     questions:[
-      { q:"Where does the fish live?", choices:["in the sea","in a tree","in the sky"], answer:0 },
-      { q:"What does the fish like to do?", choices:["swim","run","fly"], answer:0 }
+      { q:"Why can't Ben play football?", choices:["He is sick.","It is raining.","He has homework."], answer:1 },
+      { q:"What does Ben do at home?", choices:["reads a storybook","watches TV","plays games"], answer:0 },
+      { q:"What is the story about?", choices:["a clever fox","a big elephant","a brave lion"], answer:2 }
     ]
   },
   {
-    id:"en-4", lang:"en", level:3, title:"A Sunny Day", emoji:"☀️",
-    text:["It is a sunny day.","Tom and his sister go to the park.","They fly a kite.","The kite goes up high.","They are very happy."],
-    glossary:{ "sunny":"晴朗，有太陽", "park":"公園", "kite":"風箏", "happy":"開心" },
+    id:"en-5", lang:"en", level:2, title:"In the Playground", emoji:"🛝",
+    text:["The sun is shining.","Many children are playing in the playground.","Tom is flying a kite with his sister.","Two girls are skipping under the tree.","Everyone is having a good time."],
+    glossary:{ "shining":"照耀緊、好猛", "playground":"遊樂場", "skipping":"跳緊繩", "everyone":"每一個人" },
     questions:[
-      { q:"How is the weather?", choices:["sunny","rainy","snowy"], answer:0 },
-      { q:"Where do they go?", choices:["the park","the shop","school"], answer:0 },
-      { q:"What do they fly?", choices:["a kite","a plane","a bird"], answer:0 },
-      { q:"How do they feel?", choices:["happy","sad","angry"], answer:0 }
+      { q:"How is the weather?", choices:["sunny","rainy","windy"], answer:0 },
+      { q:"Who is flying a kite with Tom?", choices:["his mother","his sister","his friend"], answer:1 },
+      { q:"What are the two girls doing?", choices:["reading books","eating lunch","skipping"], answer:2 }
+    ]
+  },
+  {
+    id:"en-4", lang:"en", level:3, title:"The Little Seed", emoji:"🌱",
+    text:["Amy puts a little seed in a pot.","She waters it every day and puts it near the window.","After two weeks, a small green plant comes out.","One month later, it has a pretty pink flower.","Amy is proud of her little plant."],
+    glossary:{ "seed":"種子", "waters":"淋水、澆水", "near the window":"喺窗口附近", "proud":"自豪、好滿足" },
+    questions:[
+      { q:"Where does Amy put the seed?", choices:["in a pot","in the sea","in her bag"], answer:0 },
+      { q:"What does Amy do every day?", choices:["sings to it","waters it","cuts it"], answer:1 },
+      { q:"What colour is the flower?", choices:["yellow","white","pink"], answer:2 },
+      { q:"How does Amy feel at the end?", choices:["proud","angry","scared"], answer:0 }
+    ]
+  },
+  {
+    id:"en-6", lang:"en", level:3, title:"My Birthday", emoji:"🎂",
+    text:["Yesterday was my birthday.","Mum made a big chocolate cake for me.","My friends came to my home in the afternoon.","We played games and sang songs together.","I said thank you to everyone for the lovely presents."],
+    glossary:{ "yesterday":"尋日、昨天", "made":"整咗、做咗", "together":"一齊", "presents":"禮物" },
+    questions:[
+      { q:"When was my birthday?", choices:["yesterday","today","last year"], answer:0 },
+      { q:"Who made the cake?", choices:["my friends","Mum","my teacher"], answer:1 },
+      { q:"What did we do together?", choices:["did homework","cleaned the house","played games and sang songs"], answer:2 },
+      { q:"What did I say to everyone?", choices:["goodbye","thank you","sorry"], answer:1 }
     ]
   }
 
