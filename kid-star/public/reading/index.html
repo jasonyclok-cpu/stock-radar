@@ -187,18 +187,25 @@
     }catch(e){}
   }
 
-  // ---- 選文 ----
-  let cur=null, qi=0, correctCnt=0, tries=0;
+  // ---- 選文（洗牌袋：可讀嘅文章全部讀勻先再重複，且唔會連續出同一篇）----
+  let cur=null, qi=0, correctCnt=0, tries=0, lastId=null;
   function nextPassage(){
     const lang=S.lang, lv=curLv();
-    let pool = DATA.filter(p=>p.lang===lang && p.level<=lv);
+    if(!Array.isArray(S.seen)) S.seen=[];
+    const pool = DATA.filter(p=>p.lang===lang && p.level<=lv);
     let fresh = pool.filter(p=>!S.seen.includes(p.id));
-    if(fresh.length===0){ S.seen=S.seen.filter(id=>!pool.some(p=>p.id===id)); fresh=pool; }
-    // 優先當前等級
-    const atLv = fresh.filter(p=>p.level===lv);
-    cur = pick(atLv.length?atLv:fresh);
-    S.seen.push(cur.id); if(S.seen.length>20) S.seen.shift();
+    if(fresh.length===0){                    // 呢個語言/等級全部讀勻 → 重新開一輪
+      S.seen = S.seen.filter(id=>!pool.some(p=>p.id===id));
+      fresh = pool.slice();
+    }
+    // 唔好連續出返啱啱嗰篇（仲有其他可揀嘅話）
+    let choose = fresh;
+    if(lastId){ const f2 = fresh.filter(p=>p.id!==lastId); if(f2.length) choose = f2; }
+    cur = pick(choose);
+    lastId = cur.id;
+    S.seen.push(cur.id);
     qi=0; correctCnt=0; tries=0;
+    save();
     renderRead();
   }
 
