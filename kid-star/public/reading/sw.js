@@ -1,5 +1,5 @@
 /* kid-star ・ reading 模組 service worker */
-const CACHE = 'kidstar-reading-v4';
+const CACHE = 'kidstar-reading-v5';
 const ASSETS = ['./', './index.html', './passages.js', './cars.js', './garage.js', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', (e) => {
