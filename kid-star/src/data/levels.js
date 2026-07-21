@@ -81,7 +81,9 @@ export const LEVELS = {
       { id: 5, name: '星星挑戰', emoji: '🌟', topics: ['拼寫', 'a/an 用法', '單複數', '句子填充'] },
       { id: 6, name: '時光機', emoji: '⏰', topics: ['過去式'] },
       { id: 7, name: '位置探險', emoji: '🧭', topics: ['介詞'] },
-      { id: 8, name: '終極挑戰', emoji: '👑', topics: ['拼寫', 'a/an 用法', '單複數', '句子填充', '過去式', '介詞'] },
+      { id: 8, name: '所有格屋', emoji: '🔑', topics: ['所有格'] },
+      { id: 9, name: '標點碼頭', emoji: '✒️', topics: ['英文標點'] },
+      { id: 10, name: '終極挑戰', emoji: '👑', topics: ['拼寫', 'a/an 用法', '單複數', '句子填充', '過去式', '介詞', '所有格', '英文標點'] },
     ],
     小三: [
       { id: 1, name: '進行式車站', emoji: '🚂', topics: ['現在進行式'] },

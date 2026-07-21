@@ -1582,5 +1582,181 @@
     "options": ["duck", "dack", "duk", "ducke"],
     "answer": "duck",
     "explanation": "鴨仔係 duck:d-u-c-k。"
+  },
+  {
+    "id": "e2-poss-001",
+    "subject": "english",
+    "topic": "所有格",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "This is ___ book. (I)",
+    "options": ["my", "me", "I"],
+    "answer": "my",
+    "explanation": "I 嘅所有格(表示「我嘅」)係 my:This is my book。"
+  },
+  {
+    "id": "e2-poss-002",
+    "subject": "english",
+    "topic": "所有格",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "That is ___ ball. (you)",
+    "options": ["your", "you", "yours"],
+    "answer": "your",
+    "explanation": "you 嘅所有格係 your(你嘅):That is your ball。"
+  },
+  {
+    "id": "e2-poss-003",
+    "subject": "english",
+    "topic": "所有格",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "This is ___ hat. (he)",
+    "options": ["his", "him", "he"],
+    "answer": "his",
+    "explanation": "he 嘅所有格係 his(他嘅):This is his hat。"
+  },
+  {
+    "id": "e2-poss-004",
+    "subject": "english",
+    "topic": "所有格",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "That is ___ doll. (she)",
+    "options": ["her", "she", "hers"],
+    "answer": "her",
+    "explanation": "she 嘅所有格係 her(她嘅):That is her doll。"
+  },
+  {
+    "id": "e2-poss-005",
+    "subject": "english",
+    "topic": "所有格",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "We love ___ school. (we)",
+    "options": ["our", "us", "we"],
+    "answer": "our",
+    "explanation": "we 嘅所有格係 our(我哋嘅):We love our school。"
+  },
+  {
+    "id": "e2-poss-006",
+    "subject": "english",
+    "topic": "所有格",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "They ride ___ bikes. (they)",
+    "options": ["their", "them", "they"],
+    "answer": "their",
+    "explanation": "they 嘅所有格係 their(他們嘅):They ride their bikes。"
+  },
+  {
+    "id": "e2-poss-007",
+    "subject": "english",
+    "topic": "所有格",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "This is ___ bag. (Tom 嘅)",
+    "options": ["Tom's", "Toms", "Tom"],
+    "answer": "Tom's",
+    "explanation": "人名後面加「's」表示屬於邊個:Tom's bag = Tom 嘅袋。"
+  },
+  {
+    "id": "e2-poss-008",
+    "subject": "english",
+    "topic": "所有格",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "The dog wags ___ tail. (it)",
+    "options": ["its", "it's", "it"],
+    "answer": "its",
+    "explanation": "it 嘅所有格係 its(冇撇號)。it's 係 it is 嘅縮寫,唔同㗎。"
+  },
+  {
+    "id": "e2-punc-001",
+    "subject": "english",
+    "topic": "英文標點",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "English sentences begin with a ___ letter.",
+    "options": ["capital (big)", "small", "red"],
+    "answer": "capital (big)",
+    "explanation": "英文句子開頭第一個字母要用大楷(capital letter)。"
+  },
+  {
+    "id": "e2-punc-002",
+    "subject": "english",
+    "topic": "英文標點",
+    "difficulty": 1,
+    "type": "multiple_choice",
+    "question": "Are you happy___  What mark goes in the blank?",
+    "options": ["?", ".", "!"],
+    "answer": "?",
+    "explanation": "問句(question)結尾要用問號「?」。"
+  },
+  {
+    "id": "e2-punc-003",
+    "subject": "english",
+    "topic": "英文標點",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "I like apples___  What mark ends this telling sentence?",
+    "options": [".", "?", ","],
+    "answer": ".",
+    "explanation": "直述句(telling sentence)結尾用句號「.」(full stop)。"
+  },
+  {
+    "id": "e2-punc-004",
+    "subject": "english",
+    "topic": "英文標點",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "Wow, it is so big___  What mark goes here?",
+    "options": ["!", ".", "?"],
+    "answer": "!",
+    "explanation": "表達強烈感覺(exclamation)用感嘆號「!」。"
+  },
+  {
+    "id": "e2-punc-005",
+    "subject": "english",
+    "topic": "英文標點",
+    "difficulty": 2,
+    "type": "multiple_choice",
+    "question": "The word for 「我」 is always written as ___.",
+    "options": ["capital I", "small i", "ii"],
+    "answer": "capital I",
+    "explanation": "英文「我」字 I 無論喺句子邊度,都要用大楷 I。"
+  },
+  {
+    "id": "e2-punc-006",
+    "subject": "english",
+    "topic": "英文標點",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "In a list we use a ___ : apples, oranges, pears.",
+    "options": ["comma (,)", "full stop (.)", "question mark (?)"],
+    "answer": "comma (,)",
+    "explanation": "一連串嘢排列(list),中間用逗號「,」(comma)分開。"
+  },
+  {
+    "id": "e2-punc-007",
+    "subject": "english",
+    "topic": "英文標點",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "Which one is written correctly?",
+    "options": ["My name is Amy.", "my name is amy", "My name is amy"],
+    "answer": "My name is Amy.",
+    "explanation": "句首 My 大楷、人名 Amy 大楷、句尾有句號,所以「My name is Amy.」先啱。"
+  },
+  {
+    "id": "e2-punc-008",
+    "subject": "english",
+    "topic": "英文標點",
+    "difficulty": 3,
+    "type": "multiple_choice",
+    "question": "「monday」 is a day. It should start with ___.",
+    "options": ["capital M", "small m", "a number"],
+    "answer": "capital M",
+    "explanation": "英文星期同月份係專有名詞,開頭要大楷:Monday。"
   }
 ]
